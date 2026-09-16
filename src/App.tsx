@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { siteConfig } from './data/site';
 import { getToolBySlug, tools } from './data/tools';
 import { categories } from './data/categories';
@@ -261,6 +262,9 @@ export default function App() {
         onClose={() => setSearchOpen(false)}
         onSelectTool={(slug) => navigate(`/calculators/${slug}`)}
       />
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
     </div>
   );
 }
