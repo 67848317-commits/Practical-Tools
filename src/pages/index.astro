@@ -1,0 +1,778 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ToolCard from '../components/ToolCard.astro';
+import GuideCard from '../components/GuideCard.astro';
+import { siteConfig } from '../data/site';
+import { tools } from '../data/tools';
+import { categories } from '../data/categories';
+import { guides } from '../data/guides';
+
+// Popular Tools specified for MVP
+const popularToolSlugs = [
+  'percentage-calculator',
+  'discount-calculator',
+  'tip-calculator',
+  'salary-to-hourly-calculator',
+  'paint-calculator',
+  'fuel-cost-calculator',
+];
+
+const popularTools = popularToolSlugs
+  .map((slug) => tools.find((t) => t.slug === slug))
+  .filter((t): t is typeof tools[0] => t !== undefined);
+---
+
+<Layout
+  title={`${siteConfig.brandName} – ${siteConfig.tagline}`}
+  description={siteConfig.description}
+  canonicalPath="/"
+>
+  <!-- 4. Hero Section with 5. Large Search Interface -->
+  <section class="hero-section" aria-labelledby="hero-title">
+    <div class="container hero-inner">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>Independent Everyday Utility • No Sign-up Required</span>
+      </div>
+
+      <h1 id="hero-title" class="hero-title">
+        {siteConfig.homepageHeadline}
+      </h1>
+
+      <p class="hero-desc">
+        Calculate, convert and estimate the things that matter in everyday life with fast, private, browser-based tools.
+      </p>
+
+      <!-- Large Search Interface -->
+      <div class="search-container">
+        <div class="search-box">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            id="tool-search-input"
+            type="search"
+            placeholder="Search calculators (e.g., percentage, tip, paint, fuel, salary)..."
+            autocomplete="off"
+            aria-label="Search calculators and tools"
+            aria-describedby="search-instructions"
+          />
+          <kbd class="search-kbd" title="Press forward slash to focus search">/</kbd>
+          <button id="search-clear-btn" class="search-clear hidden" type="button" aria-label="Clear search input">
+            ×
+          </button>
+        </div>
+        <p id="search-instructions" class="search-helper-text">
+          <span id="search-status">Instant client-side filter — press <kbd>/</kbd> anywhere to focus</span>
+        </p>
+
+        <!-- Quick Filter Tags -->
+        <div class="quick-tags" aria-label="Suggested search tags">
+          <span class="quick-tags-label">Popular searches:</span>
+          <button type="button" class="quick-tag-btn" data-query="percentage">Percentage</button>
+          <button type="button" class="quick-tag-btn" data-query="tip">Tip & Split</button>
+          <button type="button" class="quick-tag-btn" data-query="discount">Discount</button>
+          <button type="button" class="quick-tag-btn" data-query="salary">Salary</button>
+          <button type="button" class="quick-tag-btn" data-query="paint">Paint</button>
+          <button type="button" class="quick-tag-btn" data-query="fuel">Fuel Cost</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Popular Tools Section -->
+  <section class="container section-padding" id="tools-section" aria-labelledby="popular-tools-title">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Instant Utilities</div>
+        <h2 id="popular-tools-title" class="section-title">Popular Tools & Calculators</h2>
+        <p class="section-desc text-muted">
+          Each tool provides verified formulas, step-by-step arithmetic explanations, and sensible real-world defaults.
+        </p>
+      </div>
+      <div class="tools-counter">
+        <span id="results-count">Showing all {popularTools.length} tools</span>
+      </div>
+    </div>
+
+    <!-- Filterable Grid -->
+    <div id="tools-grid" class="grid-tools">
+      {popularTools.map((tool) => (
+        <div
+          class="tool-grid-item"
+          data-title={tool.title.toLowerCase()}
+          data-category={tool.category.toLowerCase()}
+          data-keywords={tool.keywords.join(' ').toLowerCase()}
+          data-intro={tool.shortIntro.toLowerCase()}
+        >
+          <ToolCard tool={tool} />
+        </div>
+      ))}
+    </div>
+
+    <!-- No Results Message -->
+    <div id="no-results" class="no-results-card hidden" role="status" aria-live="polite">
+      <div class="no-results-icon">🔍</div>
+      <h3 class="no-results-title">No matching calculators found</h3>
+      <p class="no-results-desc text-muted">
+        We could not find any tools matching your search query. Try searching for broader terms like "tax", "wage", "paint", or "split".
+      </p>
+      <button id="reset-search-btn" type="button" class="btn btn-outline text-xs">
+        Reset Search Filter
+      </button>
+    </div>
+  </section>
+
+  <!-- 7. Category Section -->
+  <section class="categories-section" aria-labelledby="categories-title">
+    <div class="container section-padding">
+      <div class="section-header-center">
+        <div class="section-eyebrow">Structured Directory</div>
+        <h2 id="categories-title" class="section-title">Explore by Category</h2>
+        <p class="section-desc text-muted">
+          Organized decision utilities tailored for household budgeting, home improvement, and daily planning.
+        </p>
+      </div>
+
+      <div class="categories-grid">
+        {categories.map((cat) => {
+          const matchingTools = tools.filter((t) => t.category === cat.slug);
+          return (
+            <a href={`/category/${cat.slug}`} class="category-box">
+              <div class="category-box-top">
+                <span class="category-name">{cat.name}</span>
+                <span class="category-count">{matchingTools.length} {matchingTools.length === 1 ? 'tool' : 'tools'}</span>
+              </div>
+              <p class="category-desc">{cat.description}</p>
+              <div class="category-link-text">
+                Browse category
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Useful Guides Section -->
+  <section class="container section-padding" aria-labelledby="guides-title">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Practical Decision Guides</div>
+        <h2 id="guides-title" class="section-title">Guides & Practical Knowledge</h2>
+        <p class="section-desc text-muted">
+          Clear, jargon-free explanations that demystify everyday mathematical formulas, retail pricing, and estimation pitfalls.
+        </p>
+      </div>
+    </div>
+
+    <div class="guides-grid">
+      {guides.map((guide) => (
+        <GuideCard guide={guide} />
+      ))}
+    </div>
+  </section>
+
+  <!-- 9. Trust & About Section -->
+  <section class="container section-padding" aria-labelledby="trust-title">
+    <div class="trust-panel">
+      <div class="trust-intro">
+        <div class="section-eyebrow">Our Editorial Promise</div>
+        <h2 id="trust-title" class="trust-title">
+          Built for clarity, speed, and mathematical integrity
+        </h2>
+        <p class="trust-desc text-muted">
+          {siteConfig.brandName} is designed as an antidote to bloated calculator websites cluttered with auto-playing video ads, popups, and obscure equations.
+        </p>
+      </div>
+
+      <div class="trust-pillars-grid">
+        <div class="trust-pillar">
+          <div class="pillar-num">01</div>
+          <h3 class="pillar-title">Transparent Formulas</h3>
+          <p class="pillar-desc text-muted">
+            We display the exact mathematical equations and arithmetic step-by-step logic behind every calculation so you never have to guess.
+          </p>
+        </div>
+
+        <div class="trust-pillar">
+          <div class="pillar-num">02</div>
+          <h3 class="pillar-title">Client-Side Privacy</h3>
+          <p class="pillar-desc text-muted">
+            All calculations run entirely in your web browser. Your salaries, travel routes, bills, and measurements are never logged or stored on our servers.
+          </p>
+        </div>
+
+        <div class="trust-pillar">
+          <div class="pillar-num">03</div>
+          <h3 class="pillar-title">Real-World Adjustments</h3>
+          <p class="pillar-desc text-muted">
+            Physical estimators account for real-world nuances: wall texture absorption, driving conditions, and sales tax rules, preventing costly surprises.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  /* --------------------------------------------------------------------------
+     Hero & Search Styling
+     -------------------------------------------------------------------------- */
+  .hero-section {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-16);
+    background: linear-gradient(180deg, var(--color-bg) 0%, #f4f4f0 100%);
+    border-bottom: 1px solid var(--color-border);
+    text-align: center;
+  }
+
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    margin-bottom: var(--space-4);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-success);
+    border-radius: 50%;
+  }
+
+  .hero-title {
+    max-width: 780px;
+    font-size: clamp(2.25rem, 5.5vw, 3.75rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: var(--space-4);
+    color: var(--color-text);
+  }
+
+  .hero-desc {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--color-text-muted);
+    max-width: 620px;
+    line-height: var(--line-height-normal);
+    margin-bottom: var(--space-8);
+  }
+
+  .search-container {
+    width: 100%;
+    max-width: 580px;
+  }
+
+  .search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-fast);
+  }
+
+  .search-box:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-subtle), var(--shadow-md);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: var(--space-4);
+    color: var(--color-text-muted);
+    pointer-events: none;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: var(--space-4) calc(var(--space-12) + var(--space-2)) var(--space-4) calc(var(--space-10) + var(--space-2));
+    font-size: var(--font-size-base);
+    border: none;
+    border-radius: var(--radius-xl);
+    background: transparent;
+    color: var(--color-text);
+    outline: none;
+  }
+
+  .search-kbd {
+    position: absolute;
+    right: var(--space-4);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    background-color: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    pointer-events: none;
+  }
+
+  .search-clear {
+    position: absolute;
+    right: var(--space-4);
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: var(--space-2);
+  }
+
+  .search-clear:hover {
+    color: var(--color-text);
+  }
+
+  .search-helper-text {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .quick-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+
+  .quick-tags-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+    font-weight: 500;
+  }
+
+  .quick-tag-btn {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .quick-tag-btn:hover {
+    border-color: var(--color-text-muted);
+    background-color: var(--color-surface-hover);
+  }
+
+  /* --------------------------------------------------------------------------
+     Section Layouts
+     -------------------------------------------------------------------------- */
+  .section-padding {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+
+  .section-eyebrow {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent);
+    margin-bottom: var(--space-2);
+  }
+
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-10);
+  }
+
+  @media (min-width: 640px) {
+    .section-header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+  }
+
+  .section-header-center {
+    text-align: center;
+    max-width: 620px;
+    margin: 0 auto var(--space-10);
+  }
+
+  .section-title {
+    font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-2);
+  }
+
+  .section-desc {
+    font-size: var(--font-size-sm);
+    max-width: 580px;
+  }
+
+  .tools-counter {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background-color: var(--color-surface-subtle);
+    padding: 4px 10px;
+    border-radius: var(--radius-md);
+    white-space: nowrap;
+    align-self: flex-start;
+  }
+
+  @media (min-width: 640px) {
+    .tools-counter {
+      align-self: flex-end;
+    }
+  }
+
+  /* No Results Card */
+  .no-results-card {
+    text-align: center;
+    padding: var(--space-12) var(--space-6);
+    background-color: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    margin-top: var(--space-4);
+  }
+
+  .no-results-icon {
+    font-size: 2rem;
+    margin-bottom: var(--space-3);
+  }
+
+  .no-results-title {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+  }
+
+  .no-results-desc {
+    font-size: var(--font-size-sm);
+    max-width: 440px;
+    margin: 0 auto var(--space-4);
+  }
+
+  /* --------------------------------------------------------------------------
+     Categories Grid
+     -------------------------------------------------------------------------- */
+  .categories-section {
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 640px) {
+    .categories-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .categories-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .category-box {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition-fast);
+  }
+
+  .category-box:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+
+  .category-box-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+
+  .category-name {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .category-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background-color: var(--color-surface-subtle);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+  }
+
+  .category-desc {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    line-height: var(--line-height-normal);
+    flex: 1;
+    margin-bottom: var(--space-4);
+  }
+
+  .category-link-text {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-accent);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-3);
+  }
+
+  /* --------------------------------------------------------------------------
+     Guides Grid
+     -------------------------------------------------------------------------- */
+  .guides-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 640px) {
+    .guides-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+     Trust Panel
+     -------------------------------------------------------------------------- */
+  .trust-panel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-8);
+  }
+
+  @media (min-width: 768px) {
+    .trust-panel {
+      padding: var(--space-12);
+    }
+  }
+
+  .trust-intro {
+    max-width: 680px;
+    margin-bottom: var(--space-10);
+  }
+
+  .trust-title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-3);
+  }
+
+  .trust-desc {
+    font-size: var(--font-size-sm);
+  }
+
+  .trust-pillars-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  @media (min-width: 768px) {
+    .trust-pillars-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .trust-pillar {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pillar-num {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    color: var(--color-accent);
+    background-color: var(--color-accent-subtle);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-3);
+  }
+
+  .pillar-title {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+  }
+
+  .pillar-desc {
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-relaxed);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+</style>
+
+<script>
+  // High-performance client-side tool search and filter logic
+  const searchInput = document.getElementById('tool-search-input') as HTMLInputElement | null;
+  const clearBtn = document.getElementById('search-clear-btn');
+  const kbdBadge = document.querySelector('.search-kbd');
+  const toolGridItems = document.querySelectorAll<HTMLElement>('.tool-grid-item');
+  const noResults = document.getElementById('no-results');
+  const resultsCount = document.getElementById('results-count');
+  const resetBtn = document.getElementById('reset-search-btn');
+  const quickTagButtons = document.querySelectorAll<HTMLButtonElement>('.quick-tag-btn');
+  const totalTools = toolGridItems.length;
+
+  function filterTools(query: string) {
+    const cleanQuery = query.toLowerCase().trim();
+    let matchCount = 0;
+
+    toolGridItems.forEach((item) => {
+      const title = item.getAttribute('data-title') || '';
+      const category = item.getAttribute('data-category') || '';
+      const keywords = item.getAttribute('data-keywords') || '';
+      const intro = item.getAttribute('data-intro') || '';
+
+      const isMatch =
+        !cleanQuery ||
+        title.includes(cleanQuery) ||
+        category.includes(cleanQuery) ||
+        keywords.includes(cleanQuery) ||
+        intro.includes(cleanQuery);
+
+      if (isMatch) {
+        item.style.display = '';
+        matchCount++;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    // Update UI Elements
+    if (noResults) {
+      if (matchCount === 0) {
+        noResults.classList.remove('hidden');
+      } else {
+        noResults.classList.add('hidden');
+      }
+    }
+
+    if (resultsCount) {
+      if (!cleanQuery) {
+        resultsCount.textContent = `Showing all ${totalTools} tools`;
+      } else {
+        resultsCount.textContent = `Found ${matchCount} of ${totalTools} tools`;
+      }
+    }
+
+    if (clearBtn && kbdBadge) {
+      if (cleanQuery.length > 0) {
+        clearBtn.classList.remove('hidden');
+        kbdBadge.classList.add('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+        kbdBadge.classList.remove('hidden');
+      }
+    }
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const query = (e.target as HTMLInputElement).value;
+      filterTools(query);
+    });
+
+    // Keyboard shortcut: '/' focuses search
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== searchInput) {
+        // Prevent typing '/' into input if user is outside form
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      } else if (e.key === 'Escape' && document.activeElement === searchInput) {
+        searchInput.value = '';
+        filterTools('');
+        searchInput.blur();
+      }
+    });
+  }
+
+  if (clearBtn && searchInput) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      filterTools('');
+      searchInput.focus();
+    });
+  }
+
+  if (resetBtn && searchInput) {
+    resetBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      filterTools('');
+      searchInput.focus();
+    });
+  }
+
+  // Quick tag buttons
+  quickTagButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const query = btn.getAttribute('data-query') || '';
+      if (searchInput) {
+        searchInput.value = query;
+        filterTools(query);
+        searchInput.focus();
+      }
+    });
+  });
+</script>

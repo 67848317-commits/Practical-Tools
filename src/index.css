@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* Editorial Utility Color Palette */
+    --color-bg-page: #fbfbfa;
+    --color-bg-surface: #ffffff;
+    --color-bg-muted: #f4f4f2;
+    --color-bg-subtle: #edece8;
+    
+    --color-text-main: #18191b;
+    --color-text-muted: #56585d;
+    --color-text-light: #7c7e85;
+    
+    --color-border-subtle: #e5e5e0;
+    --color-border-strong: #cfcfc8;
+
+    --color-primary: #1e293b; /* Crisp dark slate */
+    --color-primary-hover: #0f172a;
+    --color-accent: #2563eb;
+    --color-accent-subtle: #eff6ff;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-bg-page);
+    color: var(--color-text-main);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Accessible focus indicators */
+  :focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}
+
+/* Number input styling without spinners where desired */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Print styles */
+@media print {
+  header, footer, .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

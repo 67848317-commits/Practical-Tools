@@ -1,0 +1,206 @@
+---
+import { siteConfig } from '../data/site';
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <!-- Brand Logo / Link -->
+    <a href="/" class="brand-link" aria-label={`${siteConfig.brandName} Home`}>
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="16" height="20" x="4" y="2" rx="2" />
+          <line x1="8" x2="16" y1="6" y2="6" />
+          <line x1="16" x2="16" y1="14" y2="18" />
+          <path d="M16 10h.01" />
+          <path d="M12 10h.01" />
+          <path d="M8 10h.01" />
+          <path d="M12 14h.01" />
+          <path d="M8 14h.01" />
+          <path d="M12 18h.01" />
+          <path d="M8 18h.01" />
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">{siteConfig.brandName}</span>
+        <span class="brand-tagline">{siteConfig.tagline}</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="desktop-nav" aria-label="Primary Navigation">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/calculators" class="nav-link">Calculators</a>
+      <a href="/about" class="nav-link">About</a>
+      <a href="/contact" class="nav-link">Contact</a>
+    </nav>
+
+    <!-- Mobile Menu Button -->
+    <button 
+      id="mobile-menu-btn" 
+      class="mobile-menu-btn" 
+      aria-label="Toggle navigation menu" 
+      aria-expanded="false"
+      aria-controls="mobile-nav"
+    >
+      <svg id="menu-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="4" x2="20" y1="12" y2="12" />
+        <line x1="4" x2="20" y1="6" y2="6" />
+        <line x1="4" x2="20" y1="18" y2="18" />
+      </svg>
+      <svg id="menu-icon-close" class="hidden" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" x2="6" y1="6" y2="18" />
+        <line x1="6" x2="18" y1="6" y2="18" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Dropdown Navigation -->
+  <nav id="mobile-nav" class="mobile-nav hidden" aria-label="Mobile Navigation">
+    <div class="container mobile-nav-inner">
+      <a href="/" class="mobile-nav-link">Home</a>
+      <a href="/calculators" class="mobile-nav-link">Calculators</a>
+      <a href="/about" class="mobile-nav-link">About</a>
+      <a href="/contact" class="mobile-nav-link">Contact</a>
+    </div>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .header-inner {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    background-color: var(--color-primary);
+    color: var(--color-primary-text);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-name {
+    font-size: var(--font-size-base);
+    font-weight: 800;
+    color: var(--color-text);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .brand-tagline {
+    display: none;
+    font-size: 11px;
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 768px) {
+    .brand-tagline {
+      display: block;
+    }
+  }
+
+  .desktop-nav {
+    display: none;
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 640px) {
+    .desktop-nav {
+      display: flex;
+    }
+  }
+
+  .nav-link {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    transition: color var(--transition-fast);
+  }
+
+  .nav-link:hover {
+    color: var(--color-text);
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text);
+    padding: var(--space-2);
+  }
+
+  @media (min-width: 640px) {
+    .mobile-menu-btn {
+      display: none;
+    }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .mobile-nav {
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-4) 0;
+  }
+
+  .mobile-nav-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .mobile-nav-link {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text);
+    padding: var(--space-2) 0;
+  }
+</style>
+
+<script>
+  // Vanilla JS Mobile Menu Toggle
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const mobileNav = document.getElementById('mobile-nav');
+  const iconOpen = document.getElementById('menu-icon-open');
+  const iconClose = document.getElementById('menu-icon-close');
+
+  if (menuBtn && mobileNav && iconOpen && iconClose) {
+    menuBtn.addEventListener('click', () => {
+      const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
+      menuBtn.setAttribute('aria-expanded', (!isExpanded).toString());
+      mobileNav.classList.toggle('hidden');
+      iconOpen.classList.toggle('hidden');
+      iconClose.classList.toggle('hidden');
+    });
+  }
+</script>

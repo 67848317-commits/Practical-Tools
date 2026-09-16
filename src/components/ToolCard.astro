@@ -1,0 +1,127 @@
+---
+import type { ToolDefinition } from '../types';
+
+export interface Props {
+  tool: ToolDefinition;
+}
+
+const { tool } = Astro.props;
+---
+
+<article class="tool-card">
+  <a href={`/calculators/${tool.slug}`} class="tool-card-link">
+    <div class="tool-card-top">
+      <span class="tool-category-badge">{tool.category.replace('-', ' & ')}</span>
+      {tool.badge && (
+        <span class="tool-feature-badge">{tool.badge}</span>
+      )}
+    </div>
+
+    <h3 class="tool-card-title">{tool.title}</h3>
+    <p class="tool-card-desc">{tool.shortIntro}</p>
+
+    <div class="tool-card-footer">
+      <span class="tool-action-label">
+        Open Calculator
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </span>
+    </div>
+  </a>
+</article>
+
+<style>
+  .tool-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .tool-card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+
+  .tool-card-link {
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .tool-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .tool-category-badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    background-color: var(--color-surface-subtle);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+  }
+
+  .tool-feature-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-accent);
+    background-color: var(--color-accent-subtle);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+  }
+
+  .tool-card-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+    line-height: var(--line-height-tight);
+  }
+
+  .tool-card-desc {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    line-height: var(--line-height-normal);
+    flex: 1;
+    margin-bottom: var(--space-4);
+  }
+
+  .tool-card-footer {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--color-surface-subtle);
+    padding-top: var(--space-3);
+  }
+
+  .tool-action-label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    transition: gap var(--transition-fast);
+  }
+
+  .tool-card:hover .tool-action-label {
+    gap: var(--space-2);
+    color: var(--color-accent);
+  }
+</style>

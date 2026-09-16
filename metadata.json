@@ -1,0 +1,6 @@
+{
+  "name": "Practical Tools",
+  "description": "Fast, clean, and accurate practical calculators and everyday decision-making tools for finance, home improvement, math, and daily planning.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
