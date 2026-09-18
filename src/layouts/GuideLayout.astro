@@ -1,0 +1,1071 @@
+---
+import Layout from './Layout.astro';
+import type { GuideItem } from '../data/guides';
+import { tools } from '../data/tools';
+import { guides, getRelatedGuides } from '../data/guides';
+import { siteConfig } from '../data/site';
+
+export interface Props {
+  guide: GuideItem;
+}
+
+const { guide } = Astro.props;
+
+const canonicalPath = `/guides/${guide.slug}`;
+const relatedGuideItems = getRelatedGuides(guide.relatedGuides || []);
+const relatedToolItems = guide.relatedTools
+  .map((slug) => tools.find((t) => t.slug === slug))
+  .filter((t): t is typeof tools[0] => t !== undefined);
+
+// Primary calculator CTA
+const primaryTool = relatedToolItems[0];
+
+// Article JSON-LD Schema
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: guide.title,
+  description: guide.description,
+  datePublished: guide.publishedDate,
+  dateModified: guide.updatedDate || guide.publishedDate,
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': `${siteConfig.url}/guides/${guide.slug}`,
+  },
+  author: {
+    '@type': 'Organization',
+    name: siteConfig.brandName,
+    url: siteConfig.url,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: siteConfig.brandName,
+    url: siteConfig.url,
+  },
+};
+
+// FAQPage Schema if FAQs exist
+const faqSchema = guide.faqs && guide.faqs.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: guide.faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: f.answer,
+    },
+  })),
+} : undefined;
+
+const combinedSchema = faqSchema ? [articleSchema, faqSchema] : articleSchema;
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Guides', url: '/guides' },
+  { name: guide.category, url: `/guides?category=${encodeURIComponent(guide.category.toLowerCase())}` },
+  { name: guide.title },
+];
+---
+
+<Layout
+  title={guide.title}
+  description={guide.description}
+  canonicalPath={canonicalPath}
+  ogType="article"
+  breadcrumbs={breadcrumbs}
+  jsonLd={combinedSchema}
+>
+  <article class="guide-article-container" itemscope itemtype="https://schema.org/Article">
+    <!-- 1. Breadcrumb Navigation -->
+    <nav class="guide-breadcrumbs" aria-label="Breadcrumb">
+      <a href="/" class="breadcrumb-link">Home</a>
+      <span class="breadcrumb-separator">/</span>
+      <a href="/guides" class="breadcrumb-link">Guides</a>
+      <span class="breadcrumb-separator">/</span>
+      <span class="breadcrumb-current">{guide.title}</span>
+    </nav>
+
+    <!-- 2 & 3 & 4. Article Header -->
+    <header class="guide-header">
+      <div class="guide-meta-bar">
+        <span class="guide-category-badge">{guide.category}</span>
+        <span class="guide-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          {guide.readingTime}
+        </span>
+        <span class="meta-dot">•</span>
+        <time datetime={guide.publishedDate} class="guide-date">
+          Updated {guide.updatedDate}
+        </time>
+      </div>
+
+      <h1 class="guide-main-title" itemprop="headline">{guide.title}</h1>
+      <p class="guide-short-intro" itemprop="description">{guide.shortIntro}</p>
+
+      <!-- 5. Quick Answer / Key Takeaway Box -->
+      <div id="quick-answer" class="quick-answer-box">
+        <div class="answer-header">
+          <div class="answer-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="9 12 12 15 16 10" />
+            </svg>
+            Quick Answer & Summary
+          </div>
+          {primaryTool && (
+            <a href={`/calculators/${primaryTool.slug}`} class="quick-tool-link">
+              Calculate in {primaryTool.shortTitle} →
+            </a>
+          )}
+        </div>
+        <p class="quick-answer-text">
+          {guide.quickAnswer ? guide.quickAnswer.text : guide.directAnswer}
+        </p>
+
+        {guide.quickAnswer && (
+          <div class="quick-answer-grid">
+            <div class="qa-grid-item formula-box">
+              <span class="qa-label">Quick Formula</span>
+              <code>{guide.quickAnswer.formula}</code>
+            </div>
+            <div class="qa-grid-item example-box">
+              <span class="qa-label">Instant Example</span>
+              <p>{guide.quickAnswer.example}</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- 6. Table of Contents -->
+    <nav class="guide-toc" aria-label="Table of Contents">
+      <div class="toc-header">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6" />
+          <line x1="8" y1="12" x2="21" y2="12" />
+          <line x1="8" y1="18" x2="21" y2="18" />
+          <line x1="3" y1="6" x2="3.01" y2="6" />
+          <line x1="3" y1="12" x2="3.01" y2="12" />
+          <line x1="3" y1="18" x2="3.01" y2="18" />
+        </svg>
+        <span>Table of Contents</span>
+      </div>
+      <div class="toc-grid">
+        <a href="#quick-answer" class="toc-link">1. Quick Answer & Summary</a>
+        <a href="#concepts" class="toc-link">2. Understanding the Concepts</a>
+        <a href="#formula" class="toc-link">3. The Formula & Notation</a>
+        <a href="#step-by-step" class="toc-link">4. Step-by-Step Calculation</a>
+        <a href="#examples" class="toc-link">5. Worked Practical Examples</a>
+        <a href="#real-world" class="toc-link">6. Real-World Considerations</a>
+        <a href="#mistakes" class="toc-link">7. Common Mistakes to Avoid</a>
+        <a href="#tips" class="toc-link">8. Practical Tips & Shortcuts</a>
+        <a href="#calculators" class="toc-link">9. Interactive Calculators</a>
+        <a href="#faqs" class="toc-link">10. Frequently Asked Questions</a>
+        <a href="#takeaway" class="toc-link">11. Final Takeaway</a>
+      </div>
+    </nav>
+
+    <!-- 14. Primary Interactive Calculator CTA Banner -->
+    {primaryTool && (
+      <aside class="primary-calculator-cta" aria-label="Interactive Tool Recommendation">
+        <div class="cta-text">
+          <span class="cta-label">Interactive Calculator</span>
+          <h3 class="cta-title">Want to calculate this instantly?</h3>
+          <p class="cta-desc">Use our free client-side {primaryTool.title} with live arithmetic breakdown.</p>
+        </div>
+        <a href={`/calculators/${primaryTool.slug}`} class="cta-button">
+          Open {primaryTool.shortTitle}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </a>
+      </aside>
+    )}
+
+    <!-- Main Content Body -->
+    <div class="guide-content-body">
+
+      <!-- 7. Understanding the Concepts -->
+      {guide.concepts && guide.concepts.length > 0 && (
+        <section id="concepts" class="guide-section">
+          <h2>Understanding the Concepts</h2>
+          {guide.conceptsIntro && (
+            <p class="concepts-intro">{guide.conceptsIntro}</p>
+          )}
+          <div class="concepts-grid">
+            {guide.concepts.map((concept) => (
+              <div class="concept-card">
+                <h3 class="concept-term">{concept.term}</h3>
+                <p class="concept-definition">{concept.definition}</p>
+                {concept.example && (
+                  <div class="concept-example">
+                    <strong>Example:</strong> {concept.example}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- 8. The Mathematical Formula -->
+      <section id="formula" class="guide-section">
+        <h2>The Formula</h2>
+        <div class="formula-card">
+          <div class="formula-name">{guide.formula.name}</div>
+          <div class="formula-equation select-text">
+            <pre><code>{guide.formula.equation}</code></pre>
+          </div>
+          <ul class="formula-notes">
+            {guide.formula.explanation.map((note) => (
+              <li>{note}</li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <!-- 9. Step-by-Step Calculation Process -->
+      <section id="step-by-step" class="guide-section">
+        <h2>Step-by-Step Explanation</h2>
+        <ol class="steps-list">
+          {guide.steps.map((step, idx) => (
+            <li class="step-item">
+              <span class="step-num">{idx + 1}</span>
+              <span class="step-text">{step}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <!-- 10. Worked Practical Examples -->
+      <section id="examples" class="guide-section">
+        <h2>Worked Practical Examples</h2>
+        <div class="examples-grid">
+          {guide.workedExamples.map((ex) => (
+            <div class="example-box">
+              <h3 class="example-title">{ex.title}</h3>
+              <p class="example-scenario">{ex.scenario}</p>
+              <div class="example-steps">
+                {ex.steps.map((s) => (
+                  <div class="example-step">→ {s}</div>
+                ))}
+              </div>
+              <div class="example-result">
+                <strong>Result:</strong> {ex.result}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- 11. Real-World Considerations -->
+      {guide.realWorldConsiderations && guide.realWorldConsiderations.length > 0 && (
+        <section id="real-world" class="guide-section">
+          <h2>Real-World Considerations</h2>
+          <div class="real-world-list">
+            {guide.realWorldConsiderations.map((rw) => (
+              <div class="real-world-item">
+                <h3 class="rw-factor">⚠️ {rw.factor}</h3>
+                <p class="rw-desc">{rw.description}</p>
+                <div class="rw-impact">
+                  <strong>Practical Impact:</strong> {rw.impact}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- 12. Common Mistakes to Avoid -->
+      <section id="mistakes" class="guide-section">
+        <h2>Common Mistakes to Avoid</h2>
+        <div class="mistakes-list">
+          {guide.commonMistakes.map((m) => (
+            <div class="mistake-item">
+              <h3 class="mistake-title">❌ {m.title}</h3>
+              <p class="mistake-desc">{m.description}</p>
+              <div class="mistake-fix">
+                <strong>How to fix:</strong> {m.fix}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- 13. Practical Tips & Mental Math Shortcuts -->
+      <section id="tips" class="guide-section">
+        <h2>Practical Tips & Mental Math Shortcuts</h2>
+        <ul class="tips-list">
+          {guide.practicalTips.map((tip) => (
+            <li class="tip-item">
+              <span class="tip-icon">💡</span>
+              <span class="tip-text">{tip}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- Slot for custom guide-specific additions -->
+      <slot />
+
+      <!-- 14. Related Calculators -->
+      {relatedToolItems.length > 0 && (
+        <section id="calculators" class="guide-section related-tools-section">
+          <h2>Related Calculators</h2>
+          <div class="related-tools-grid">
+            {relatedToolItems.map((tool) => (
+              <a href={`/calculators/${tool.slug}`} class="related-tool-card">
+                <div class="tool-card-top">
+                  <span class="tool-card-badge">{tool.category}</span>
+                  <span class="tool-card-arrow">→</span>
+                </div>
+                <h3 class="tool-card-title">{tool.title}</h3>
+                <p class="tool-card-desc">{tool.shortIntro}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- 15. Related Practical Guides -->
+      {relatedGuideItems.length > 0 && (
+        <section class="guide-section related-guides-section">
+          <h2>Related Practical Guides</h2>
+          <div class="related-guides-grid">
+            {relatedGuideItems.map((rg) => (
+              <a href={`/guides/${rg.slug}`} class="related-guide-card">
+                <span class="rg-category">{rg.category}</span>
+                <h3 class="rg-title">{rg.title}</h3>
+                <p class="rg-desc">{rg.description}</p>
+                <span class="rg-cta">Read Guide →</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- 16. Frequently Asked Questions -->
+      {guide.faqs && guide.faqs.length > 0 && (
+        <section id="faqs" class="guide-section">
+          <h2>Frequently Asked Questions</h2>
+          <div class="faqs-list">
+            {guide.faqs.map((faq) => (
+              <details class="faq-item">
+                <summary class="faq-question">{faq.question}</summary>
+                <div class="faq-answer">{faq.answer}</div>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- 17. Final Takeaway -->
+      {guide.finalTakeaway && (
+        <section id="takeaway" class="guide-section final-takeaway-card">
+          <div class="takeaway-badge">✨ Key Takeaways</div>
+          <h2 class="takeaway-title">Summary & Best Practices</h2>
+          <p class="takeaway-text">{guide.finalTakeaway}</p>
+        </section>
+      )}
+
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .guide-article-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* Breadcrumbs */
+  .guide-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .breadcrumb-link {
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .breadcrumb-link:hover {
+    color: #0f172a;
+  }
+  .breadcrumb-separator {
+    color: #94a3b8;
+  }
+  .breadcrumb-current {
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  /* Header */
+  .guide-header {
+    margin-bottom: 2rem;
+  }
+  .guide-meta-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .guide-category-badge {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    font-weight: 700;
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .guide-reading-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .meta-dot {
+    color: #cbd5e1;
+  }
+  .guide-date {
+    color: #64748b;
+  }
+  .guide-main-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.25;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+  }
+  .guide-short-intro {
+    font-size: 1.125rem;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Quick Answer Box */
+  .quick-answer-box {
+    background-color: #ecfdf5;
+    border: 2px solid #a7f3d0;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .answer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .answer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #065f46;
+  }
+  .quick-tool-link {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #047857;
+    text-decoration: none;
+  }
+  .quick-tool-link:hover {
+    text-decoration: underline;
+  }
+  .quick-answer-text {
+    font-size: 1rem;
+    color: #064e3b;
+    line-height: 1.6;
+    font-weight: 500;
+    margin: 0;
+  }
+  .quick-answer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #d1fae5;
+  }
+  .qa-grid-item {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #a7f3d0;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.8125rem;
+  }
+  .qa-label {
+    display: block;
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #047857;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Table of Contents */
+  .guide-toc {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .toc-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #334155;
+    margin-bottom: 0.75rem;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem 1rem;
+  }
+  .toc-link {
+    font-size: 0.8125rem;
+    color: #475569;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .toc-link:hover {
+    color: #d97706;
+    text-decoration: underline;
+  }
+
+  /* Primary Calculator CTA */
+  .primary-calculator-cta {
+    background: linear-gradient(to right, #eff6ff, #f8fafc);
+    border: 1px solid #bfdbfe;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .cta-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #2563eb;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  .cta-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.25rem 0;
+  }
+  .cta-desc {
+    font-size: 0.875rem;
+    color: #475569;
+    margin: 0;
+  }
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #2563eb;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  .cta-button:hover {
+    background-color: #1d4ed8;
+  }
+
+  /* Guide Content Body */
+  .guide-content-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+  .guide-section h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.015em;
+  }
+
+  /* Concepts */
+  .concepts-intro {
+    font-size: 1rem;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+  .concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .concept-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+  }
+  .concept-term {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.375rem;
+  }
+  .concept-definition {
+    font-size: 0.8125rem;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+  }
+  .concept-example {
+    font-size: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    color: #475569;
+  }
+
+  /* Formula Card */
+  .formula-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+  }
+  .formula-name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 0.75rem;
+  }
+  .formula-equation {
+    background-color: #f1f5f9;
+    border-left: 4px solid #f59e0b;
+    padding: 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin-bottom: 1rem;
+  }
+  .formula-equation pre {
+    margin: 0;
+  }
+  .formula-equation code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: pre-wrap;
+    user-select: all;
+  }
+  .formula-notes {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: 0.875rem;
+    color: #475569;
+    line-height: 1.6;
+  }
+
+  /* Steps List */
+  .steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1rem;
+  }
+  .step-num {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-text {
+    font-size: 0.875rem;
+    color: #334155;
+    line-height: 1.5;
+    padding-top: 0.125rem;
+  }
+
+  /* Examples Grid */
+  .examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.25rem;
+  }
+  .example-box {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .example-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.375rem;
+  }
+  .example-scenario {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  .example-steps {
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+    color: #334155;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .example-result {
+    padding-top: 0.75rem;
+    border-top: 1px solid #f1f5f9;
+    font-size: 0.8125rem;
+    color: #059669;
+    font-family: ui-monospace, monospace;
+    font-weight: 600;
+  }
+
+  /* Real-World Considerations */
+  .real-world-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .real-world-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+  }
+  .rw-factor {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.375rem;
+  }
+  .rw-desc {
+    font-size: 0.8125rem;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 0.625rem;
+  }
+  .rw-impact {
+    background: rgba(245, 158, 11, 0.08);
+    border-left: 3px solid #f59e0b;
+    padding: 0.625rem;
+    border-radius: 0 0.375rem 0.375rem 0;
+    font-size: 0.75rem;
+    color: #92400e;
+  }
+
+  /* Mistakes List */
+  .mistakes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .mistake-item {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+  }
+  .mistake-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+  }
+  .mistake-desc {
+    font-size: 0.8125rem;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+  .mistake-fix {
+    background-color: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.8125rem;
+    color: #065f46;
+    line-height: 1.4;
+  }
+
+  /* Tips List */
+  .tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background-color: rgba(245, 158, 11, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    font-size: 0.875rem;
+    color: #334155;
+    line-height: 1.5;
+  }
+  .tip-icon {
+    font-size: 1.125rem;
+    flex-shrink: 0;
+  }
+
+  /* FAQs */
+  .faqs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .faq-item {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+  .faq-question {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #0f172a;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .faq-question::-webkit-details-marker {
+    display: none;
+  }
+  .faq-question::after {
+    content: '▼';
+    font-size: 0.625rem;
+    color: #94a3b8;
+    transition: transform 0.2s;
+  }
+  .faq-item[open] .faq-question::after {
+    transform: rotate(180deg);
+    color: #d97706;
+  }
+  .faq-answer {
+    padding: 0 1.25rem 1rem;
+    font-size: 0.8125rem;
+    color: #475569;
+    line-height: 1.6;
+    border-top: 1px solid #f1f5f9;
+    background-color: #f8fafc;
+  }
+
+  /* Final Takeaway */
+  .final-takeaway-card {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #ffffff;
+    border-radius: 1rem;
+    padding: 1.75rem;
+  }
+  .takeaway-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #f59e0b;
+    margin-bottom: 0.5rem;
+  }
+  .takeaway-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.75rem;
+  }
+  .takeaway-text {
+    font-size: 0.875rem;
+    color: #e2e8f0;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Related Tools Grid */
+  .related-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  .related-tool-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.15s;
+  }
+  .related-tool-card:hover {
+    border-color: #f59e0b;
+  }
+  .tool-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  .tool-card-badge {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+  }
+  .tool-card-arrow {
+    color: #f59e0b;
+    font-weight: 700;
+  }
+  .tool-card-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.25rem;
+  }
+  .tool-card-desc {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* Related Guides Grid */
+  .related-guides-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+  .related-guide-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.15s;
+  }
+  .related-guide-card:hover {
+    border-color: #f59e0b;
+  }
+  .rg-category {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #d97706;
+    margin-bottom: 0.35rem;
+    display: block;
+  }
+  .rg-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+  }
+  .rg-desc {
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+  }
+  .rg-cta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #d97706;
+  }
+
+  @media (max-width: 640px) {
+    .primary-calculator-cta {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .guide-main-title {
+      font-size: 1.75rem;
+    }
+    .quick-answer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,11 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getGuideBySlug } from '../../data/guides';
+
+const guide = getGuideBySlug('how-to-calculate-flooring');
+if (!guide) {
+  throw new Error('Guide how-to-calculate-flooring not found in dataset');
+}
+---
+
+<GuideLayout guide={guide} />

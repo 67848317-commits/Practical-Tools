@@ -1,0 +1,11 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { getGuideBySlug } from '../../data/guides';
+
+const guide = getGuideBySlug('how-much-paint-do-i-need');
+if (!guide) {
+  throw new Error('Guide how-much-paint-do-i-need not found in dataset');
+}
+---
+
+<GuideLayout guide={guide} />

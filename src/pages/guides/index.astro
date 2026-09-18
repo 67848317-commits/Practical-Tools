@@ -1,0 +1,172 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import GuideCard from '../../components/GuideCard.astro';
+import { guides } from '../../data/guides';
+import { siteConfig } from '../../data/site';
+
+const categories = ['All', 'Money', 'Home', 'Everyday', 'Cooking', 'Work & School'];
+
+const pageTitle = 'Guides & Practical Knowledge';
+const pageDescription = 'Practical explanations, formulas, and everyday tips to help you make better calculations and decisions.';
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Guides' },
+];
+---
+
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  canonicalPath="/guides"
+  breadcrumbs={breadcrumbs}
+>
+  <div class="container guides-index-container">
+    <header class="guides-index-header">
+      <div class="header-badge">Editorial Decision Guides</div>
+      <h1 class="guides-index-title">Guides & Practical Knowledge</h1>
+      <p class="guides-index-intro">
+        Practical explanations, formulas, and everyday tips to help you make better calculations and decisions.
+      </p>
+    </header>
+
+    <!-- Category Filter Bar -->
+    <div class="category-tabs" aria-label="Filter guides by category">
+      {categories.map((cat) => (
+        <button
+          type="button"
+          class={`cat-tab-btn ${cat === 'All' ? 'active' : ''}`}
+          data-cat={cat.toLowerCase()}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+
+    <!-- Guides Grid -->
+    <div class="guides-grid" id="guides-container">
+      {guides.map((guide) => (
+        <div class="guide-grid-item" data-category={guide.category.toLowerCase()}>
+          <GuideCard guide={guide} />
+        </div>
+      ))}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .guides-index-container {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-16);
+  }
+
+  .guides-index-header {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto var(--space-10);
+  }
+
+  .header-badge {
+    display: inline-block;
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #1e40af;
+    background-color: #dbeafe;
+    border: 1px solid #bfdbfe;
+    padding: 3px 12px;
+    border-radius: var(--radius-full);
+    margin-bottom: var(--space-3);
+  }
+
+  .guides-index-title {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+    margin-bottom: var(--space-3);
+  }
+
+  .guides-index-intro {
+    font-size: var(--font-size-base);
+    color: #334155;
+    line-height: var(--line-height-normal);
+  }
+
+  .category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-10);
+  }
+
+  .cat-tab-btn {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .cat-tab-btn:hover {
+    color: var(--color-text);
+    border-color: var(--color-border-strong);
+  }
+
+  .cat-tab-btn.active {
+    background-color: var(--color-primary);
+    color: var(--color-primary-text);
+    border-color: var(--color-primary);
+  }
+
+  .guides-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 640px) {
+    .guides-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .guides-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+</style>
+
+<script>
+  const tabButtons = document.querySelectorAll<HTMLButtonElement>('.cat-tab-btn');
+  const guideItems = document.querySelectorAll<HTMLElement>('.guide-grid-item');
+
+  tabButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      tabButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const selectedCat = btn.getAttribute('data-cat') || 'all';
+
+      guideItems.forEach((item) => {
+        const itemCat = item.getAttribute('data-category') || '';
+        if (selectedCat === 'all' || itemCat.includes(selectedCat)) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+    });
+  });
+</script>

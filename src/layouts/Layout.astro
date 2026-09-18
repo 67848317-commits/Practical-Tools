@@ -93,6 +93,16 @@ if (jsonLd) {
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KB367TCJTJ"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-KB367TCJTJ');
+    </script>
+
     <!-- Structured Data (JSON-LD) -->
     {baseSchemas.map((schema) => (
       <script type="application/ld+json" set:html={JSON.stringify(schema)} />

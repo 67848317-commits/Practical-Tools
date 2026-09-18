@@ -17,6 +17,7 @@ import { ContactPage } from './pages/ContactPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 import { GuidePage } from './pages/GuidePage';
+import { GuidesIndexPage } from './pages/GuidesIndexPage';
 
 export default function App() {
   // Normalize current path from window.location.pathname or default to '/'
@@ -160,24 +161,39 @@ export default function App() {
       return;
     }
 
-    // 8. Guide Page: /guides/:slug
-    if (currentPath.startsWith('/guides/')) {
-      const guideSlug = currentPath.replace('/guides/', '').split('/')[0];
+    // 8. Guides Index: /guides
+    if (currentPath === '/guides') {
       updatePageSEO({
-        title: `Practical Decision Guide`,
-        description: `Practical calculations, decision guides, and everyday estimation methods.`,
-        canonicalPath: `/guides/${guideSlug}`,
-        breadcrumbs: [{ name: 'Guides' }],
+        title: 'Guides & Practical Knowledge',
+        description: 'Practical explanations, formulas, and everyday tips to help you make better calculations and decisions.',
+        canonicalPath: '/guides',
+        breadcrumbs: [{ name: 'Home', url: '/' }, { name: 'Guides' }],
       });
       return;
     }
 
-    // 8. Default: Home Page: /
+    // 9. Guide Page: /guides/:slug
+    if (currentPath.startsWith('/guides/')) {
+      // GuidePage manages its own detailed SEO in useEffect
+      return;
+    }
+
+    // 10. Default: Home Page: /
     updatePageSEO({
       title: `${siteConfig.brandName} – ${siteConfig.tagline}`,
       description: siteConfig.description,
       canonicalPath: '/',
     });
+  }, [currentPath]);
+
+  // Google Analytics SPA pageview tracking
+  useEffect(() => {
+    if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+      (window as any).gtag('config', 'G-KB367TCJTJ', {
+        page_path: currentPath,
+        page_location: window.location.href,
+      });
+    }
   }, [currentPath]);
 
   // View Component Renderer
@@ -220,6 +236,9 @@ export default function App() {
     }
     if (normalized === '/terms') {
       return <TermsPage onNavigate={navigate} />;
+    }
+    if (normalized === '/guides') {
+      return <GuidesIndexPage onNavigate={navigate} />;
     }
     if (normalized.startsWith('/guides/')) {
       const guideSlug = normalized.replace('/guides/', '').split('/')[0];

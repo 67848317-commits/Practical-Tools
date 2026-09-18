@@ -71,6 +71,15 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate, onOpenS
             All Tools
           </a>
           <a
+            href="/guides"
+            onClick={(e) => handleLinkClick(e, '/guides')}
+            className={`px-3 py-1.5 rounded-md transition-colors ${
+              currentPath.startsWith('/guides') ? 'text-slate-900 bg-slate-100 font-semibold' : 'hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            Guides
+          </a>
+          <a
             href="/category/money"
             onClick={(e) => handleLinkClick(e, '/category/money')}
             className={`px-3 py-1.5 rounded-md transition-colors ${
@@ -147,6 +156,13 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate, onOpenS
               className="px-3 py-2 rounded-md hover:bg-slate-100 transition-colors"
             >
               All Calculators & Tools
+            </a>
+            <a
+              href="/guides"
+              onClick={(e) => handleLinkClick(e, '/guides')}
+              className="px-3 py-2 rounded-md hover:bg-slate-100 transition-colors font-medium text-slate-900"
+            >
+              Guides & Practical Knowledge
             </a>
             <div className="pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-slate-400 px-2">Categories</div>
             {categories.slice(0, 5).map((cat) => (

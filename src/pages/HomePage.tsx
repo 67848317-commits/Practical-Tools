@@ -193,43 +193,63 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenSearch }) 
 
       {/* 8. Useful Guides Section */}
       <section className="py-14 max-w-6xl mx-auto px-4 sm:px-6" aria-labelledby="guides-title">
-        <div className="mb-8">
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-600 block mb-1">
-            Practical Decision Guides
-          </span>
-          <h2 id="guides-title" className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Guides & Practical Knowledge
-          </h2>
-          <p className="text-sm text-slate-500 mt-1 max-w-xl">
-            Clear, jargon-free explanations that demystify everyday mathematical formulas, retail pricing, and estimation pitfalls.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-700 block mb-1">
+              Practical Decision Guides
+            </span>
+            <h2 id="guides-title" className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Guides & Practical Knowledge
+            </h2>
+            <p className="text-sm text-slate-600 mt-1 max-w-xl">
+              Clear, jargon-free explanations that demystify everyday mathematical formulas, retail pricing, and estimation pitfalls.
+            </p>
+          </div>
+          <a
+            href="/guides"
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate('/guides');
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors whitespace-nowrap self-start sm:self-end"
+          >
+            <span>View all guides</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {guides.map((guide) => (
-            <article
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {guides.slice(0, 4).map((guide) => (
+            <a
               key={guide.slug}
-              className="p-6 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-2xs transition-all flex flex-col justify-between"
+              href={`/guides/${guide.slug}`}
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate(`/guides/${guide.slug}`);
+              }}
+              className="group p-5 bg-white rounded-2xl border border-slate-200 hover:border-blue-500/50 hover:shadow-md transition-all flex flex-col justify-between text-left focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-2.5">
-                  <span className="font-bold text-blue-600 uppercase tracking-wider">{guide.category}</span>
-                  <span>{guide.readTime}</span>
+                  <span className="font-bold text-blue-600 uppercase tracking-wider text-[11px] bg-blue-50 px-2 py-0.5 rounded">
+                    {guide.category}
+                  </span>
+                  <span className="text-[11px]">{guide.readingTime}</span>
                 </div>
-                <h3 className="text-base font-bold text-slate-900 mb-2 leading-snug">
+                <h3 className="text-sm font-bold text-slate-900 mb-2 leading-snug group-hover:text-blue-600 transition-colors">
                   {guide.title}
                 </h3>
-                <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                  {guide.excerpt}
+                <p className="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-3">
+                  {guide.description}
                 </p>
               </div>
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-700">
-                <span className="text-slate-400 font-normal">Published {guide.publishedDate}</span>
-                <span className="text-blue-600 flex items-center gap-1">
+                <span className="text-slate-400 font-normal text-[11px]">{guide.publishedDate}</span>
+                <span className="text-blue-600 group-hover:text-blue-700 flex items-center gap-1 group-hover:gap-1.5 transition-all">
                   Read guide <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>
-            </article>
+            </a>
           ))}
         </div>
       </section>

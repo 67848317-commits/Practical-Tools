@@ -139,6 +139,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <ul className="space-y-2 text-sm">
               <li>
                 <a
+                  href="/guides"
+                  onClick={(e) => handleLink(e, '/guides')}
+                  className="text-amber-600 hover:text-amber-700 font-medium transition-colors"
+                >
+                  Guides & Knowledge Base
+                </a>
+              </li>
+              <li>
+                <a
                   href="/about"
                   onClick={(e) => handleLink(e, '/about')}
                   className="hover:text-slate-900 transition-colors"

@@ -9,6 +9,12 @@ interface UpdateSEOOps {
   tool?: ToolDefinition;
   breadcrumbs?: BreadcrumbItem[];
   faqs?: FAQItem[];
+  article?: {
+    headline: string;
+    description: string;
+    publishedDate: string;
+    updatedDate?: string;
+  };
 }
 
 export function updatePageSEO({
@@ -19,6 +25,7 @@ export function updatePageSEO({
   tool,
   breadcrumbs,
   faqs,
+  article,
 }: UpdateSEOOps): void {
   const fullTitle = title 
     ? `${title} | ${siteConfig.brandName}`
@@ -63,13 +70,14 @@ export function updatePageSEO({
   canonicalEl.setAttribute('href', canonicalUrl);
 
   // 4. Update Schema.org Structured Data
-  updateStructuredData({ tool, breadcrumbs, faqs, canonicalUrl, fullTitle, fullDesc });
+  updateStructuredData({ tool, breadcrumbs, faqs, article, canonicalUrl, fullTitle, fullDesc });
 }
 
 function updateStructuredData({
   tool,
   breadcrumbs,
   faqs,
+  article,
   canonicalUrl,
   fullTitle,
   fullDesc,
@@ -77,6 +85,12 @@ function updateStructuredData({
   tool?: ToolDefinition;
   breadcrumbs?: BreadcrumbItem[];
   faqs?: FAQItem[];
+  article?: {
+    headline: string;
+    description: string;
+    publishedDate: string;
+    updatedDate?: string;
+  };
   canonicalUrl: string;
   fullTitle: string;
   fullDesc: string;
@@ -155,6 +169,32 @@ function updateStructuredData({
           text: faq.answer,
         },
       })),
+    });
+  }
+
+  // Article Schema for Guides & Knowledge Base
+  if (article) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: article.headline,
+      description: article.description,
+      datePublished: article.publishedDate,
+      dateModified: article.updatedDate || article.publishedDate,
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': canonicalUrl,
+      },
+      author: {
+        '@type': 'Organization',
+        name: siteConfig.brandName,
+        url: siteConfig.url,
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: siteConfig.brandName,
+        url: siteConfig.url,
+      },
     });
   }
 
