@@ -2,6 +2,6 @@
 User-agent: *
 Allow: /
 
-# Host & Sitemap Directives
+# Sitemap Index
 Sitemap: https://practicaltools.org/sitemap.xml
 Host: practicaltools.org
