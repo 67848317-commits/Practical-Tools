@@ -255,15 +255,18 @@ export const GuidePage: React.FC<GuidePageProps> = ({ slug, onNavigate }) => {
               Use our free client-side {primaryTool.title} with real-time arithmetic breakdown and instant input updates.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => onNavigate(`/calculators/${primaryTool.slug}`)}
+          <a
+            href={`/calculators/${primaryTool.slug}`}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate(`/calculators/${primaryTool.slug}`);
+            }}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold whitespace-nowrap transition-colors self-start sm:self-center shrink-0 shadow-sm"
           >
             <Calculator className="w-4 h-4" />
             Open {primaryTool.shortTitle}
             <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          </a>
         </aside>
       )}
 
@@ -499,10 +502,13 @@ export const GuidePage: React.FC<GuidePageProps> = ({ slug, onNavigate }) => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {relatedGuidesList.map((relGuide) => (
-                <button
+                <a
                   key={relGuide.slug}
-                  type="button"
-                  onClick={() => onNavigate(`/guides/${relGuide.slug}`)}
+                  href={`/guides/${relGuide.slug}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onNavigate(`/guides/${relGuide.slug}`);
+                  }}
                   className="p-5 rounded-xl bg-white border border-slate-200 hover:border-amber-500 text-left transition-colors flex flex-col justify-between group shadow-2xs"
                 >
                   <div>
@@ -522,7 +528,7 @@ export const GuidePage: React.FC<GuidePageProps> = ({ slug, onNavigate }) => {
                       Read Guide →
                     </span>
                   </div>
-                </button>
+                </a>
               ))}
             </div>
           </section>

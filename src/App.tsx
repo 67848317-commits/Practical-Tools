@@ -18,11 +18,21 @@ import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 import { GuidePage } from './pages/GuidePage';
 import { GuidesIndexPage } from './pages/GuidesIndexPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
-export default function App() {
-  // Normalize current path from window.location.pathname or default to '/'
+interface AppProps {
+  initialPath?: string;
+  calculatorRegistry?: Record<string, React.ComponentType<any>>;
+}
+
+export default function App({ initialPath, calculatorRegistry }: AppProps = {}) {
+  // Normalize current path from initialPath prop, window.location.pathname, or default to '/'
   const [currentPath, setCurrentPath] = useState<string>(() => {
-    return window.location.pathname || '/';
+    if (initialPath) return initialPath;
+    if (typeof window !== 'undefined') {
+      return window.location.pathname || '/';
+    }
+    return '/';
   });
 
   const [searchOpen, setSearchOpen] = useState<boolean>(false);
@@ -178,11 +188,21 @@ export default function App() {
       return;
     }
 
-    // 10. Default: Home Page: /
+    // 10. Home Page: /
+    if (normalized === '/' || normalized === '') {
+      updatePageSEO({
+        title: `${siteConfig.brandName} – ${siteConfig.tagline}`,
+        description: siteConfig.description,
+        canonicalPath: '/',
+      });
+      return;
+    }
+
+    // 11. 404 Not Found Page
     updatePageSEO({
-      title: `${siteConfig.brandName} – ${siteConfig.tagline}`,
-      description: siteConfig.description,
-      canonicalPath: '/',
+      title: `Page Not Found | ${siteConfig.brandName}`,
+      description: 'The requested tool or practical guide could not be located on Practical Tools.',
+      canonicalPath: normalized,
     });
   }, [currentPath]);
 
@@ -207,7 +227,7 @@ export default function App() {
       const slug = normalized.replace('/calculators/', '').split('/')[0];
       const tool = getToolBySlug(slug);
       if (tool) {
-        return <ToolLayout tool={tool} onNavigate={navigate} />;
+        return <ToolLayout tool={tool} onNavigate={navigate} calculatorRegistry={calculatorRegistry} />;
       }
     }
 
@@ -246,7 +266,12 @@ export default function App() {
     }
 
     // Home Page
-    return <HomePage onNavigate={navigate} onOpenSearch={() => setSearchOpen(true)} />;
+    if (normalized === '/' || normalized === '') {
+      return <HomePage onNavigate={navigate} onOpenSearch={() => setSearchOpen(true)} />;
+    }
+
+    // 404 Fallback
+    return <NotFoundPage onNavigate={navigate} />;
   };
 
   return (

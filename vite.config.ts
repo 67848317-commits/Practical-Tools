@@ -9,18 +9,27 @@ export default defineConfig(() => {
     plugins: [
       react(),
       tailwindcss(),
-      {
-        name: 'generate-spa-404-fallback',
-        closeBundle() {
-          const distDir = path.resolve(__dirname, 'dist');
-          const indexPath = path.resolve(distDir, 'index.html');
-          const fallbackPath = path.resolve(distDir, '404.html');
-          if (fs.existsSync(indexPath)) {
-            fs.copyFileSync(indexPath, fallbackPath);
-          }
+    ],
+    build: {
+      rollupOptions: {
+        output: {
+          chunkFileNames: (chunkInfo) => {
+            if (chunkInfo.name.includes('Calculator') || chunkInfo.name.includes('Converter')) {
+              return 'assets/calc-[name]-[hash].js';
+            }
+            return 'assets/[name]-[hash].js';
+          },
+          manualChunks(id) {
+            if (id.includes('node_modules/lucide-react')) {
+              return 'icons';
+            }
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+              return 'vendor-react';
+            }
+          },
         },
       },
-    ],
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

@@ -1,159 +1,64 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Breadcrumbs } from './Breadcrumbs';
 import { FAQSection } from './FAQSection';
 import { RelatedTools } from './RelatedTools';
 import { AdSlot } from './AdSlot';
-import { PercentageCalculator } from './calculators/PercentageCalculator';
-import { DiscountCalculator } from './calculators/DiscountCalculator';
-import { TipCalculator } from './calculators/TipCalculator';
-import { SalaryCalculator } from './calculators/SalaryCalculator';
-import { PaintCalculator } from './calculators/PaintCalculator';
-import { FuelCostCalculator } from './calculators/FuelCostCalculator';
-import { MarkupCalculator } from './calculators/MarkupCalculator';
-import { FlooringCalculator } from './calculators/FlooringCalculator';
-import { TileCalculator } from './calculators/TileCalculator';
-import { ConcreteCalculator } from './calculators/ConcreteCalculator';
-import { MulchCalculator } from './calculators/MulchCalculator';
-import { GasMileageCalculator } from './calculators/GasMileageCalculator';
-import { CommuteCostCalculator } from './calculators/CommuteCostCalculator';
-import { ElectricityCostCalculator } from './calculators/ElectricityCostCalculator';
-import { DateDifferenceCalculator } from './calculators/DateDifferenceCalculator';
-import { RecipeScaleCalculator } from './calculators/RecipeScaleCalculator';
-import { CookingUnitConverter } from './calculators/CookingUnitConverter';
-import { CupsToGramsConverter } from './calculators/CupsToGramsConverter';
-import { WorkHoursCalculator } from './calculators/WorkHoursCalculator';
-import { GpaCalculator } from './calculators/GpaCalculator';
+
+// Dynamic code-split imports for each calculator module
+const PercentageCalculator = React.lazy(() => import('./calculators/PercentageCalculator').then((m) => ({ default: m.PercentageCalculator })));
+const DiscountCalculator = React.lazy(() => import('./calculators/DiscountCalculator').then((m) => ({ default: m.DiscountCalculator })));
+const TipCalculator = React.lazy(() => import('./calculators/TipCalculator').then((m) => ({ default: m.TipCalculator })));
+const SalaryCalculator = React.lazy(() => import('./calculators/SalaryCalculator').then((m) => ({ default: m.SalaryCalculator })));
+const PaintCalculator = React.lazy(() => import('./calculators/PaintCalculator').then((m) => ({ default: m.PaintCalculator })));
+const FuelCostCalculator = React.lazy(() => import('./calculators/FuelCostCalculator').then((m) => ({ default: m.FuelCostCalculator })));
+const MarkupCalculator = React.lazy(() => import('./calculators/MarkupCalculator').then((m) => ({ default: m.MarkupCalculator })));
+const FlooringCalculator = React.lazy(() => import('./calculators/FlooringCalculator').then((m) => ({ default: m.FlooringCalculator })));
+const TileCalculator = React.lazy(() => import('./calculators/TileCalculator').then((m) => ({ default: m.TileCalculator })));
+const ConcreteCalculator = React.lazy(() => import('./calculators/ConcreteCalculator').then((m) => ({ default: m.ConcreteCalculator })));
+const MulchCalculator = React.lazy(() => import('./calculators/MulchCalculator').then((m) => ({ default: m.MulchCalculator })));
+const GasMileageCalculator = React.lazy(() => import('./calculators/GasMileageCalculator').then((m) => ({ default: m.GasMileageCalculator })));
+const CommuteCostCalculator = React.lazy(() => import('./calculators/CommuteCostCalculator').then((m) => ({ default: m.CommuteCostCalculator })));
+const ElectricityCostCalculator = React.lazy(() => import('./calculators/ElectricityCostCalculator').then((m) => ({ default: m.ElectricityCostCalculator })));
+const DateDifferenceCalculator = React.lazy(() => import('./calculators/DateDifferenceCalculator').then((m) => ({ default: m.DateDifferenceCalculator })));
+const RecipeScaleCalculator = React.lazy(() => import('./calculators/RecipeScaleCalculator').then((m) => ({ default: m.RecipeScaleCalculator })));
+const CookingUnitConverter = React.lazy(() => import('./calculators/CookingUnitConverter').then((m) => ({ default: m.CookingUnitConverter })));
+const CupsToGramsConverter = React.lazy(() => import('./calculators/CupsToGramsConverter').then((m) => ({ default: m.CupsToGramsConverter })));
+const WorkHoursCalculator = React.lazy(() => import('./calculators/WorkHoursCalculator').then((m) => ({ default: m.WorkHoursCalculator })));
+const GpaCalculator = React.lazy(() => import('./calculators/GpaCalculator').then((m) => ({ default: m.GpaCalculator })));
+
 import type { ToolDefinition } from '../types';
-import { BookOpen, AlertTriangle, Check, Sparkles, Info } from 'lucide-react';
+import { BookOpen, AlertTriangle, Check, Sparkles, Info, ArrowRight } from 'lucide-react';
+import { getCompanionGuideForTool } from '../data/guides';
+import { updatePageSEO } from '../utils/seo';
 
 interface ToolLayoutProps {
   tool: ToolDefinition;
   onNavigate: (path: string) => void;
+  calculatorRegistry?: Record<string, React.ComponentType<any>>;
 }
 
-export const ToolLayout: React.FC<ToolLayoutProps> = ({ tool, onNavigate }) => {
+export const ToolLayout: React.FC<ToolLayoutProps> = ({ tool, onNavigate, calculatorRegistry }) => {
+  const companionGuide = getCompanionGuideForTool(tool.slug);
+
   useEffect(() => {
-    const originalTitle = document.title;
-    document.title = tool.metaTitle || `${tool.title} – Practical Tools`;
-
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (!metaDesc) {
-      metaDesc = document.createElement('meta');
-      metaDesc.setAttribute('name', 'description');
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute('content', tool.metaDescription || tool.shortIntro);
-
-    const setMeta = (property: string, content: string) => {
-      let el = document.querySelector(`meta[property="${property}"]`) || document.querySelector(`meta[name="${property}"]`);
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute(property.startsWith('og:') ? 'property' : 'name', property);
-        document.head.appendChild(el);
-      }
-      el.setAttribute('content', content);
-    };
-
-    setMeta('og:title', tool.metaTitle || tool.title);
-    setMeta('og:description', tool.metaDescription || tool.shortIntro);
-    const fullUrl = `https://practicaltools.org${tool.path || `/calculators/${tool.slug}`}`;
-    setMeta('og:url', fullUrl);
-    setMeta('twitter:title', tool.metaTitle || tool.title);
-    setMeta('twitter:description', tool.metaDescription || tool.shortIntro);
-
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', fullUrl);
-
-    const scriptId = 'tool-schema-jsonld';
-    let scriptEl = document.getElementById(scriptId) as HTMLScriptElement | null;
-    if (!scriptEl) {
-      scriptEl = document.createElement('script');
-      scriptEl.id = scriptId;
-      scriptEl.type = 'application/ld+json';
-      document.head.appendChild(scriptEl);
-    }
-
-    const schemaData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': `${fullUrl}#webapp`,
-          'name': tool.title,
-          'url': fullUrl,
-          'description': tool.metaDescription || tool.shortIntro,
-          'applicationCategory': 'UtilityApplication',
-          'operatingSystem': 'All',
-          'offers': {
-            '@type': 'Offer',
-            'price': '0',
-            'priceCurrency': 'USD',
-          },
-        },
-        {
-          '@type': 'WebPage',
-          '@id': `${fullUrl}#webpage`,
-          'url': fullUrl,
-          'name': tool.metaTitle || tool.title,
-          'description': tool.metaDescription || tool.shortIntro,
-          'breadcrumb': {
-            '@type': 'BreadcrumbList',
-            'itemListElement': [
-              {
-                '@type': 'ListItem',
-                'position': 1,
-                'name': 'Calculators',
-                'item': 'https://practicaltools.org/calculators',
-              },
-              {
-                '@type': 'ListItem',
-                'position': 2,
-                'name': tool.category.replace('-', ' & '),
-                'item': `https://practicaltools.org/category/${tool.category}`,
-              },
-              {
-                '@type': 'ListItem',
-                'position': 3,
-                'name': tool.title,
-                'item': fullUrl,
-              },
-            ],
-          },
-        },
-        ...(tool.faqs && tool.faqs.length > 0
-          ? [
-              {
-                '@type': 'FAQPage',
-                '@id': `${fullUrl}#faq`,
-                'mainEntity': tool.faqs.map((faq) => ({
-                  '@type': 'Question',
-                  'name': faq.question,
-                  'acceptedAnswer': {
-                    '@type': 'Answer',
-                    'text': faq.answer,
-                  },
-                })),
-              },
-            ]
-          : []),
+    updatePageSEO({
+      title: tool.metaTitle || `${tool.title} – Practical Tools`,
+      description: tool.metaDescription || tool.shortIntro,
+      canonicalPath: tool.path || `/calculators/${tool.slug}`,
+      breadcrumbs: [
+        { name: 'Calculators', url: '/calculators' },
+        { name: tool.category, url: `/category/${tool.category.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}` },
+        { name: tool.shortTitle || tool.title },
       ],
-    };
-
-    scriptEl.text = JSON.stringify(schemaData);
-
-    return () => {
-      document.title = originalTitle;
-      const el = document.getElementById(scriptId);
-      if (el) el.remove();
-    };
+      tool: tool,
+      faqs: tool.faqs,
+    });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
   }, [tool]);
 
-  const renderCalculator = () => {
+  const renderLazyCalculator = () => {
     switch (tool.slug) {
       case 'percentage':
       case 'percentage-calculator':
@@ -225,6 +130,30 @@ export const ToolLayout: React.FC<ToolLayoutProps> = ({ tool, onNavigate }) => {
     }
   };
 
+  const renderCalculator = () => {
+    // If a synchronous component registry was provided (during SSG prerendering), render directly
+    if (calculatorRegistry) {
+      const SyncComp = calculatorRegistry[tool.slug] || calculatorRegistry[`${tool.slug}-calculator`];
+      if (SyncComp) {
+        return <SyncComp />;
+      }
+    }
+
+    // On the browser client, render the lazy-loaded code-split component inside Suspense
+    return (
+      <Suspense
+        fallback={
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-400 min-h-[320px] flex flex-col items-center justify-center animate-pulse">
+            <div className="w-8 h-8 rounded-full border-2 border-slate-200 border-t-slate-600 animate-spin mb-3"></div>
+            <p className="text-sm font-medium">Loading interactive calculator...</p>
+          </div>
+        }
+      >
+        {renderLazyCalculator()}
+      </Suspense>
+    );
+  };
+
   const breadcrumbs = [
     { name: 'Calculators', url: '/calculators' },
     { name: tool.category.replace('-', ' & '), url: `/category/${tool.category}` },
@@ -259,7 +188,16 @@ export const ToolLayout: React.FC<ToolLayoutProps> = ({ tool, onNavigate }) => {
 
       {/* 4, 5, 6. Calculator UI with Live Result & Reset Button */}
       <section className="mb-10" aria-label="Interactive Calculator">
-        {renderCalculator()}
+        <Suspense
+          fallback={
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-400 min-h-[320px] flex flex-col items-center justify-center animate-pulse">
+              <div className="w-8 h-8 rounded-full border-2 border-slate-200 border-t-slate-600 animate-spin mb-3"></div>
+              <p className="text-sm font-medium">Loading interactive calculator...</p>
+            </div>
+          }
+        >
+          {renderCalculator()}
+        </Suspense>
       </section>
 
       {/* Optional Top Ad Slot */}
@@ -392,7 +330,40 @@ export const ToolLayout: React.FC<ToolLayoutProps> = ({ tool, onNavigate }) => {
         </section>
       )}
 
-      {/* 11. FAQ Section */}
+      {/* 11. Companion Practical Guide Callout */}
+      {companionGuide && (
+        <section className="my-10 p-6 sm:p-7 bg-emerald-50/70 rounded-2xl border border-emerald-200/80 shadow-2xs" aria-labelledby="companion-guide-heading">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded inline-block">
+                In-Depth Companion Guide
+              </span>
+              <h2 id="companion-guide-heading" className="text-lg sm:text-xl font-bold text-slate-900">
+                {companionGuide.title}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 max-w-xl leading-relaxed">
+                {companionGuide.description}
+              </p>
+            </div>
+            <a
+              href={`/guides/${companionGuide.slug}`}
+              onClick={(e) => {
+                if (onNavigate) {
+                  e.preventDefault();
+                  onNavigate(`/guides/${companionGuide.slug}`);
+                }
+              }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 shadow-xs"
+            >
+              <BookOpen className="w-4 h-4" />
+              Read Companion Guide
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+        </section>
+      )}
+
+      {/* 12. FAQ Section */}
       <FAQSection faqs={tool.faqs} />
 
       {/* Secondary Ad Slot */}
