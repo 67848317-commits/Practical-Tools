@@ -1,11 +1,14 @@
 export type FlooringUnit = 'feet' | 'meters';
+export type FlooringPattern = 'straight' | 'diagonal' | 'herringbone' | 'custom';
 
 export interface FlooringInput {
   unit: FlooringUnit;
   length: string;
   width: string;
   wastePercent: string;
-  boxSize?: string; // optional sq ft/box
+  boxSize?: string; // sq ft/box or m²/box
+  pricePerUnit?: string; // optional price per sq ft or m²
+  pattern?: FlooringPattern;
 }
 
 export interface FlooringResult {
@@ -15,6 +18,10 @@ export interface FlooringResult {
   wasteArea: number;
   recommendedMaterial: number;
   boxesNeeded?: number;
+  totalPurchasedArea?: number;
+  overageArea?: number;
+  totalEstimatedCost?: number;
+  pricePerUnit?: number;
   areaUnit: string;
   calculationSteps: string[];
   errorMessage?: string;
@@ -28,6 +35,7 @@ export function calculateFlooring(input: FlooringInput): FlooringResult {
   const wStr = (input.width ?? '').trim();
   const wasteStr = (input.wastePercent ?? '').trim();
   const boxStr = (input.boxSize ?? '').trim();
+  const priceStr = (input.pricePerUnit ?? '').trim();
 
   if (lStr === '' || wStr === '') {
     return {
@@ -46,6 +54,7 @@ export function calculateFlooring(input: FlooringInput): FlooringResult {
   const width = parseFloat(wStr);
   const wastePercent = wasteStr === '' ? 10 : parseFloat(wasteStr);
   const boxSize = boxStr !== '' ? parseFloat(boxStr) : undefined;
+  const pricePerUnit = priceStr !== '' ? parseFloat(priceStr) : undefined;
 
   if (isNaN(length) || length <= 0 || isNaN(width) || width <= 0) {
     return {
@@ -69,7 +78,7 @@ export function calculateFlooring(input: FlooringInput): FlooringResult {
       recommendedMaterial: length * width,
       areaUnit,
       calculationSteps: [],
-      errorMessage: 'Waste factor must be a percentage between 0% and 100% (standard: 10% for straight planks, 15% for diagonal/herringbone).',
+      errorMessage: 'Waste factor must be a percentage between 0% and 100% (common trade planning allowances: 10% straight planks, 15% diagonal, 20% herringbone).',
     };
   }
 
@@ -78,19 +87,37 @@ export function calculateFlooring(input: FlooringInput): FlooringResult {
   const recommendedMaterial = basicFloorArea * (1 + wastePercent / 100);
 
   let boxesNeeded: number | undefined = undefined;
+  let totalPurchasedArea: number | undefined = undefined;
+  let overageArea: number | undefined = undefined;
+
   if (boxSize && !isNaN(boxSize) && boxSize > 0) {
     boxesNeeded = Math.ceil(recommendedMaterial / boxSize);
+    totalPurchasedArea = boxesNeeded * boxSize;
+    overageArea = totalPurchasedArea - basicFloorArea;
+  }
+
+  let totalEstimatedCost: number | undefined = undefined;
+  if (pricePerUnit && !isNaN(pricePerUnit) && pricePerUnit > 0) {
+    // If buying by the box, cost is based on total purchased box coverage; otherwise on recommended material
+    const billableArea = totalPurchasedArea ?? recommendedMaterial;
+    totalEstimatedCost = billableArea * pricePerUnit;
   }
 
   const fmt = (v: number, dec: number = 2) =>
     v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 
   const steps = [
-    `Calculate basic floor area: ${fmt(length, 1)} × ${fmt(width, 1)} = ${fmt(basicFloorArea)} ${areaUnit}`,
-    `Calculate cut & pattern waste (${wastePercent}%): ${fmt(basicFloorArea)} × ${wastePercent}% ÷ 100 = ${fmt(wasteArea)} ${areaUnit}`,
-    `Recommended material order: ${fmt(basicFloorArea)} × (1 + ${wastePercent} / 100) = ${fmt(recommendedMaterial)} ${areaUnit}`,
-    ...(boxesNeeded
-      ? [`Boxes required (at ${boxSize} ${areaUnit}/box): ceil(${fmt(recommendedMaterial)} ÷ ${boxSize}) = ${boxesNeeded} boxes`]
+    `Calculate basic net floor area: ${fmt(length, 1)} × ${fmt(width, 1)} = ${fmt(basicFloorArea)} ${areaUnit}`,
+    `Calculate cut & pattern waste allowance (${wastePercent}%): ${fmt(basicFloorArea)} × ${wastePercent}% ÷ 100 = ${fmt(wasteArea)} ${areaUnit}`,
+    `Recommended material with buffer: ${fmt(basicFloorArea)} × (1 + ${wastePercent} / 100) = ${fmt(recommendedMaterial)} ${areaUnit}`,
+    ...(boxesNeeded && boxSize
+      ? [
+          `Cartons required: ceil(${fmt(recommendedMaterial)} ÷ ${boxSize} ${areaUnit}/box) = ${boxesNeeded} full boxes`,
+          `Actual coverage purchased: ${boxesNeeded} boxes × ${boxSize} ${areaUnit} = ${fmt(totalPurchasedArea!)} ${areaUnit} (${fmt(overageArea!)} ${areaUnit} total margin over net floor)`,
+        ]
+      : []),
+    ...(totalEstimatedCost && pricePerUnit
+      ? [`Estimated total flooring material cost: ${fmt(totalPurchasedArea ?? recommendedMaterial)} ${areaUnit} × $${fmt(pricePerUnit)}/${areaUnit} = $${fmt(totalEstimatedCost)}`]
       : []),
   ];
 
@@ -101,6 +128,10 @@ export function calculateFlooring(input: FlooringInput): FlooringResult {
     wasteArea,
     recommendedMaterial,
     boxesNeeded,
+    totalPurchasedArea,
+    overageArea,
+    totalEstimatedCost,
+    pricePerUnit,
     areaUnit,
     calculationSteps: steps,
   };

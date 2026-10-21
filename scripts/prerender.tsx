@@ -160,6 +160,7 @@ async function prerender() {
   console.log(`📋 Total routes to prerender: ${routes.length}`);
 
   let successCount = 0;
+  const failedRoutes: { route: string; error: unknown }[] = [];
 
   for (const route of routes) {
     try {
@@ -289,10 +290,22 @@ async function prerender() {
       console.log(`  ✓ Prerendered: ${route.padEnd(42)} -> ${path.relative(rootDir, outFilePath)}`);
     } catch (err) {
       console.error(`  ✗ Error prerendering ${route}:`, err);
+      failedRoutes.push({ route, error: err });
     }
   }
 
-  console.log(`\n🎉 Successfully prerendered ${successCount}/${routes.length} public static HTML pages!`);
+  console.log(`\n📋 Prerender Summary: ${successCount}/${routes.length} routes succeeded.`);
+
+  if (failedRoutes.length > 0 || successCount !== routes.length) {
+    console.error(`\n❌ Prerender Failed! ${failedRoutes.length} route(s) failed out of ${routes.length} expected routes:`);
+    for (const f of failedRoutes) {
+      const msg = f.error instanceof Error ? f.error.message : String(f.error);
+      console.error(`  - Failed route: ${f.route} -> ${msg}`);
+    }
+    process.exit(1);
+  }
+
+  console.log(`🎉 Successfully prerendered all ${successCount}/${routes.length} public static HTML pages!`);
 }
 
 prerender();
