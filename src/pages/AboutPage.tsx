@@ -257,12 +257,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
             Automated Quality Assurance &amp; Verification
           </h2>
           <p className="mb-3 text-xs sm:text-sm text-slate-600">
-            Every calculator deployed on Practical Tools undergoes rigorous algorithmic regression testing before release:
+            Before publishing updates, we run automated verification checks across our calculator modules and static pages:
           </p>
           <ul className="list-disc pl-5 text-xs sm:text-sm text-slate-600 space-y-1.5 leading-relaxed">
-            <li><strong>Automated Test Suite:</strong> Mathematical formulas are evaluated across positive numbers, boundary inputs, zero-states, and invalid values using strict automated unit tests.</li>
-            <li><strong>Static Pre-rendering:</strong> All 20 calculators, 8 comprehensive guides, category indexes, and site pages are pre-rendered to complete, semantic HTML for instant loading and full search engine crawlability.</li>
-            <li><strong>Periodic Review:</strong> Reference benchmarks (such as EIA electricity rate averages and material specifications) are periodically reviewed and updated to reflect current market realities.</li>
+            <li><strong>Automated Test Suite:</strong> All 20 calculator modules are checked by an automated test script covering representative normal inputs, zero-value handling, boundary limits, invalid or empty inputs, and calculator-specific special cases (such as overnight shifts, leap-year dates, and unit conversions). While these checks help catch regressions, users should verify critical figures independently.</li>
+            <li><strong>Static Pre-rendering:</strong> All 20 calculators, 8 practical guides, category indexes, and site pages are pre-rendered to static HTML during the build process.</li>
+            <li><strong>Periodic Review:</strong> Reference benchmarks (such as EIA electricity rate averages and manufacturer material specifications) are periodically reviewed and updated against published source documents.</li>
           </ul>
         </section>
 

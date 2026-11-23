@@ -327,7 +327,7 @@ export const everydayGuides: GuideItem[] = [
     readingTime: '6 min read',
     readTime: '6 min read',
     relatedTools: ['recipe-scale', 'cups-to-grams', 'unit-converter'],
-    relatedGuides: ['how-to-calculate-percentage', 'how-much-paint-do-i-need'],
+    relatedGuides: ['how-to-calculate-percentage'],
     shortIntro: 'Whether cooking for a dinner party of twelve from a recipe written for four, or halving a dessert recipe for two, culinary math ensures your dishes retain balanced flavor, moisture, and texture.',
     directAnswer: 'To scale a recipe, divide your desired servings by the original recipe servings to find your Scale Factor (Multiplier). Then multiply every ingredient by this scale factor. Scale Factor = Desired Servings ÷ Original Servings. To double a 4-serving recipe to 8: 8 ÷ 4 = 2.0 multiplier.',
     quickAnswer: {
