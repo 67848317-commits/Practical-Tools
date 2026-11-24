@@ -35,7 +35,7 @@ export const WorkHoursCalculator: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Input Controls */}
         <div className="lg:col-span-6 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField id="shift-start" label="Shift Start Time" helperText="e.g. 09:00 (9:00 AM) or 22:00">
               <input
                 id="shift-start"
@@ -98,7 +98,7 @@ export const WorkHoursCalculator: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               id="break-mins"
               label="Unpaid Break"

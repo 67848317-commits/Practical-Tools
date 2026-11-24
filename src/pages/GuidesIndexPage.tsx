@@ -9,7 +9,14 @@ interface GuidesIndexPageProps {
 export const GuidesIndexPage: React.FC<GuidesIndexPageProps> = ({ onNavigate }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
-  const categories = ['All', 'Money', 'Home', 'Everyday', 'Cooking', 'Work & School'];
+  const orderedCategories = ['Money', 'Home', 'Everyday', 'Cooking', 'Work & School'];
+  const extraCategories = guides
+    .map((g) => g.category)
+    .filter((cat) => !orderedCategories.some((c) => c.toLowerCase() === cat.toLowerCase()));
+  const activeCategories = [...orderedCategories, ...Array.from(new Set(extraCategories))].filter((cat) =>
+    guides.some((g) => g.category.toLowerCase() === cat.toLowerCase())
+  );
+  const categories = ['All', ...activeCategories];
 
   useEffect(() => {
     updatePageSEO({

@@ -85,7 +85,7 @@ export const FlooringCalculator: React.FC = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField id="floor-length" label={`Room Length (${unitLabel})`}>
               <input
                 id="floor-length"
@@ -118,7 +118,7 @@ export const FlooringCalculator: React.FC = () => {
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
               Illustrative Pattern Waste Allowances (Editable)
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {[
                 {
                   id: 'straight' as const,
@@ -163,7 +163,7 @@ export const FlooringCalculator: React.FC = () => {
             id="waste-percent"
             label="Custom Waste Buffer"
             suffix="%"
-            helperText="Contractors recommend minimum 10% to account for perimeter cuts, end pieces, and defective planks."
+            helperText="Illustrative starting allowances begin around 10% for perimeter cuts, end pieces, and defective planks; adjust higher for diagonal, herringbone, or irregular rooms."
           >
             <input
               id="waste-percent"
@@ -181,7 +181,7 @@ export const FlooringCalculator: React.FC = () => {
             />
           </FormField>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               id="box-coverage"
               label={`Box Coverage (${areaLabel} / box)`}

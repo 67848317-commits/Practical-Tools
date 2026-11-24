@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { guides, getGuideBySlug, getRelatedGuides, GuideItem } from '../data/guides';
 import { tools } from '../data/tools';
+import { getCategoryBySlug } from '../data/categories';
 import { updatePageSEO } from '../utils/seo';
 
 interface GuidePageProps {
@@ -41,7 +42,6 @@ export const GuidePage: React.FC<GuidePageProps> = ({ slug, onNavigate }) => {
         breadcrumbs: [
           { name: 'Home', url: '/' },
           { name: 'Guides', url: '/guides' },
-          { name: guide.category, url: `/guides` },
           { name: guide.title },
         ],
         faqs: guide.faqs.map((f) => ({ question: f.question, answer: f.answer })),
@@ -475,7 +475,7 @@ export const GuidePage: React.FC<GuidePageProps> = ({ slug, onNavigate }) => {
                 >
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                      {tool.category}
+                      {getCategoryBySlug(tool.category)?.name ?? tool.category.replace('-', ' & ')}
                     </span>
                     <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-600 mb-1">
                       {tool.title}

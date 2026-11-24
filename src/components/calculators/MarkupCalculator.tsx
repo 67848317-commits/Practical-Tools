@@ -138,7 +138,7 @@ export const MarkupCalculator: React.FC = () => {
               Markup % = Margin % ÷ (1 - Margin % / 100)
             </span>
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-center text-xs">
             {[
               { margin: '20%', markup: '25.00%' },
               { margin: '25%', markup: '33.33%' },

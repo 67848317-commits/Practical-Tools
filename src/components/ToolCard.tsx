@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, Calculator, DollarSign, Home, Compass, Briefcase, Utensils } from 'lucide-react';
 import type { ToolDefinition } from '../types';
+import { getCategoryBySlug } from '../data/categories';
 
 interface ToolCardProps {
   tool: ToolDefinition;
@@ -44,7 +45,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onNavigate }) => {
         <div className="flex items-center justify-between mb-3">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
             {getCategoryIcon(tool.category)}
-            <span className="capitalize">{tool.category.replace('-', ' & ')}</span>
+            <span>{getCategoryBySlug(tool.category)?.name ?? tool.category.replace('-', ' & ')}</span>
           </span>
           {tool.badge && (
             <span className="px-2 py-0.5 text-[11px] font-medium bg-slate-100 text-slate-700 rounded-full">
