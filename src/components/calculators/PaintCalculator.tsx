@@ -162,7 +162,7 @@ export const PaintCalculator: React.FC = () => {
           ))}
         </div>
         <p className="text-[11px] text-slate-500 mt-1.5">
-          Spreading rates based on Sherwin-Williams and Benjamin Moore architectural paint technical data sheets.
+          Smooth default (350 sq ft/gal) sits within Sherwin-Williams (350–400) and Benjamin Moore (350–450) interior latex PDS ranges; textured, rough, and metric presets are illustrative editable planning estimates.
         </p>
       </div>
 
@@ -466,7 +466,7 @@ export const PaintCalculator: React.FC = () => {
                 This tool provides an approximation for planning and purchasing estimates based on industry data:
               </p>
               <ul className="list-disc pl-4 space-y-0.5 text-blue-800">
-                <li><strong>Coverage Standard:</strong> Theoretical spreading rate of 350 sq ft/gal on pre-primed drywall at recommended dry film thickness (Sherwin-Williams & Benjamin Moore Technical Data Sheets).</li>
+                <li><strong>Coverage Baseline:</strong> Smooth default (350 sq ft/gal) sits within common interior latex PDS ranges (Sherwin-Williams 350–400; Benjamin Moore Aura 350–400, Regal Select 400–450 sq ft/gal). Textured (275), rough masonry (175), and metric presets are illustrative editable planning estimates.</li>
                 <li><strong>Architectural Openings:</strong> Deductions use common trade planning allowances of ~20 sq ft (1.86 m²) per standard interior door and ~15 sq ft (1.39 m²) per double-hung window. Controls accept deduction area per opening and can be customized above. Clamped to ensure net wall area cannot be negative.</li>
                 <li><strong>Texture & Porosity:</strong> Unprimed drywall, textured knockdown, or dark-to-light color transitions absorb up to 25% more paint and require a dedicated primer coat.</li>
               </ul>

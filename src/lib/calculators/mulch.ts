@@ -61,8 +61,14 @@ export function calculateMulch(input: MulchInput): MulchResult {
   const cubicFeet = areaSqFt * depthFeet;
   const cubicYards = cubicFeet / 27;
 
-  const bags2CuFt = Math.ceil(cubicFeet / 2);
-  const bags3CuFt = Math.ceil(cubicFeet / 3);
+  const safeCeil = (val: number): number => {
+    if (val <= 1e-9) return 0;
+    const rounded = Math.round(val);
+    return Math.abs(val - rounded) < 1e-9 ? rounded : Math.ceil(val);
+  };
+
+  const bags2CuFt = safeCeil(cubicFeet / 2);
+  const bags3CuFt = safeCeil(cubicFeet / 3);
 
   const fmt = (v: number, dec: number = 2) =>
     v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });

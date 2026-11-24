@@ -239,7 +239,7 @@ export const ElectricityCostCalculator: React.FC = () => {
                   <strong>Standby / Vampire Draw:</strong> Modern TVs, game consoles, and chargers draw 1W to 15W in standby mode 24 hours a day, adding roughly $15 to $30 annually per device.
                 </li>
                 <li>
-                  <strong>EIA Rate Variance:</strong> Electricity rates vary by more than 300% across the United States, from approximately 11¢/kWh in states with abundant hydropower (Washington, Idaho) to over 35¢/kWh in California, Connecticut, and Hawaii.
+                  <strong>EIA Rate Variance (2024):</strong> State residential annual averages vary by more than 3× across the United States in EIA Table 2.10, from 11.90¢/kWh in Washington to 31.97¢/kWh in California and 42.86¢/kWh in Hawaii.
                 </li>
               </ul>
             </div>

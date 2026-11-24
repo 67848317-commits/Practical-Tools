@@ -109,9 +109,15 @@ export function calculateConcrete(input: ConcreteInput): ConcreteResult {
   const yield60 = input.bagYield60lb && input.bagYield60lb > 0 ? input.bagYield60lb : 0.45;
   const yield50 = input.bagYield50lb && input.bagYield50lb > 0 ? input.bagYield50lb : 0.375;
 
-  const bags80lb = Math.ceil(recommendedCubicFeet / yield80);
-  const bags60lb = Math.ceil(recommendedCubicFeet / yield60);
-  const bags50lb = Math.ceil(recommendedCubicFeet / yield50);
+  const safeCeil = (val: number): number => {
+    if (val <= 1e-9) return 0;
+    const rounded = Math.round(val);
+    return Math.abs(val - rounded) < 1e-9 ? rounded : Math.ceil(val);
+  };
+
+  const bags80lb = safeCeil(recommendedCubicFeet / yield80);
+  const bags60lb = safeCeil(recommendedCubicFeet / yield60);
+  const bags50lb = safeCeil(recommendedCubicFeet / yield50);
 
   const totalWeightLbs80 = bags80lb * 80;
   const totalWeightTons80 = totalWeightLbs80 / 2000;

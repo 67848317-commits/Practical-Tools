@@ -60,7 +60,7 @@ export const MulchCalculator: React.FC = () => {
             id="mulch-depth"
             label="Mulch Layer Depth (Inches)"
             suffix="in"
-            helperText="2-3 inches recommended for moisture retention and weed suppression; 1-2 inches for annual top-dressing."
+            helperText="2–3 inches recommended for moisture retention; mulch typically settles ~10–15% over time (not added automatically)."
           >
             <input
               id="mulch-depth"

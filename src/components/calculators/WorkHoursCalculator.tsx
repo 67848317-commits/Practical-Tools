@@ -36,7 +36,7 @@ export const WorkHoursCalculator: React.FC = () => {
         {/* Input Controls */}
         <div className="lg:col-span-6 space-y-6">
           <div className="grid grid-cols-2 gap-4">
-            <FormField id="shift-start" label="Shift Start Time" helperText="e.g. 09:00 AM or 22:00">
+            <FormField id="shift-start" label="Shift Start Time" helperText="e.g. 09:00 (9:00 AM) or 22:00">
               <input
                 id="shift-start"
                 type="time"
@@ -46,7 +46,7 @@ export const WorkHoursCalculator: React.FC = () => {
               />
             </FormField>
 
-            <FormField id="shift-end" label="Shift End Time" helperText="e.g. 17:30 PM or 06:00">
+            <FormField id="shift-end" label="Shift End Time" helperText="e.g. 17:30 (5:30 PM) or 06:00">
               <input
                 id="shift-end"
                 type="time"
@@ -59,7 +59,13 @@ export const WorkHoursCalculator: React.FC = () => {
 
           {result.isOvernight && (
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 font-medium">
-              🌙 Overnight shift detected: End time occurs the following morning (crosses midnight). Total span includes +24h rollover.
+              Overnight shift detected: End time occurs the following morning (crosses midnight). Total span includes +24h rollover.
+            </div>
+          )}
+
+          {!result.errorMessage && result.totalSpanMinutes === 0 && (
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium">
+              Start and end times are identical, resulting in a 0h 0m clock span.
             </div>
           )}
 

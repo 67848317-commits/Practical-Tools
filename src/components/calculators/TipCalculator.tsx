@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { RotateCcw, AlertCircle, Plus, Minus, CheckCircle2 } from 'lucide-react';
+import { RotateCcw, AlertCircle, Plus, Minus } from 'lucide-react';
+import { calculateTip } from '../../lib/calculators/tip';
 
 export const TipCalculator: React.FC = () => {
   const [billAmount, setBillAmount] = useState<string>('68.50');
@@ -18,46 +19,29 @@ export const TipCalculator: React.FC = () => {
     setRoundUp(false);
   };
 
-  const bill = parseFloat(billAmount);
-  const activeTipPct = isCustom ? parseFloat(customTip) || 0 : tipPercent;
-  const peopleCount = parseInt(peopleCountInput, 10);
+  const result = calculateTip({
+    billAmount,
+    tipPercent,
+    customTip,
+    isCustom,
+    peopleCount: peopleCountInput,
+    roundUp,
+  });
 
-  let errorMsg = '';
-  if (billAmount.trim() === '' || isNaN(bill) || bill < 0) {
-    errorMsg = 'Please enter a valid positive bill total.';
-  } else if (isCustom && (customTip.trim() === '' || isNaN(activeTipPct) || activeTipPct < 0 || activeTipPct > 200)) {
-    errorMsg = 'Tip percentage must be a valid number between 0% and 200%.';
-  } else if (isNaN(peopleCount) || peopleCount < 1) {
-    errorMsg = 'Number of people must be at least 1.';
-  }
-
-  // Formulas strictly as specified:
-  // Tip amount = Bill amount × Tip percentage / 100
-  // Total bill = Bill amount + Tip amount
-  // Amount per person = Total bill / Number of people
-  let tipAmount = !errorMsg ? (bill * activeTipPct) / 100 : 0;
-  let totalBill = !errorMsg ? bill + tipAmount : 0;
-
-  // Optional round up option
-  if (roundUp && totalBill > 0) {
-    const roundedTotal = Math.ceil(totalBill);
-    tipAmount = roundedTotal - bill;
-    totalBill = roundedTotal;
-  }
-
-  const amountPerPerson = !errorMsg && peopleCount > 0 ? totalBill / peopleCount : 0;
-  const tipPerPerson = !errorMsg && peopleCount > 0 ? tipAmount / peopleCount : 0;
+  const errorMsg = result.errorMessage ?? '';
+  const {
+    bill,
+    tipPercent: activeTipPct,
+    tipAmount,
+    totalBill,
+    amountPerPerson,
+    tipPerPerson,
+    calculationSteps,
+  } = result;
+  const peopleCount = parseInt(peopleCountInput, 10) || 1;
 
   const formatCurrency = (val: number) =>
     val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  const calculationSteps = !errorMsg
-    ? [
-        `Tip amount = $${formatCurrency(bill)} × ${activeTipPct}% ÷ 100 = $${formatCurrency(tipAmount)}`,
-        `Total bill = $${formatCurrency(bill)} + $${formatCurrency(tipAmount)} = $${formatCurrency(totalBill)}`,
-        `Amount per person = $${formatCurrency(totalBill)} ÷ ${peopleCount} = $${formatCurrency(amountPerPerson)} per person`,
-      ]
-    : [];
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs" id="tip-calculator-widget">

@@ -51,10 +51,11 @@ export function calculateFuel(input: FuelInput): FuelResult {
     };
   }
 
-  const dist = parseFloat(distStr);
-  const eff = parseFloat(effStr);
-  const price = parseFloat(priceStr);
-  const numPassengers = passStr === '' ? 1 : parseInt(passStr, 10);
+  const isStrictNumber = (s: string) => /^(?:\d+(?:\.\d+)?|\.\d+)$/.test(s);
+  const dist = isStrictNumber(distStr) ? Number(distStr) : NaN;
+  const eff = isStrictNumber(effStr) ? Number(effStr) : NaN;
+  const price = isStrictNumber(priceStr) ? Number(priceStr) : NaN;
+  const numPassengers = passStr === '' ? 1 : (/^\d+$/.test(passStr) ? Number(passStr) : NaN);
 
   if (isNaN(dist) || dist <= 0) {
     return {

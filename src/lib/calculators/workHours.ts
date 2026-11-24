@@ -45,10 +45,12 @@ export function calculateWorkHours(input: WorkHoursInput): WorkHoursResult {
   }
 
   const parseTime = (t: string): number | null => {
-    const parts = t.split(':').map((p) => parseInt(p, 10));
-    if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
-    if (parts[0] < 0 || parts[0] > 23 || parts[1] < 0 || parts[1] > 59) return null;
-    return parts[0] * 60 + parts[1];
+    const match = t.match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return null;
+    const hh = Number(match[1]);
+    const mm = Number(match[2]);
+    if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+    return hh * 60 + mm;
   };
 
   const startMins = parseTime(startStr);
@@ -71,27 +73,30 @@ export function calculateWorkHours(input: WorkHoursInput): WorkHoursResult {
     };
   }
 
-  const breakMinutes = breakStr === '' ? 0 : parseInt(breakStr, 10);
-  if (isNaN(breakMinutes) || breakMinutes < 0) {
-    return {
-      startTime: startStr,
-      endTime: endStr,
-      isOvernight: false,
-      totalSpanMinutes: 0,
-      breakMinutes: 0,
-      netWorkMinutes: 0,
-      hours: 0,
-      minutes: 0,
-      decimalHours: 0,
-      formattedDuration: '—',
-      calculationSteps: [],
-      errorMessage: 'Break duration must be a non-negative number of minutes.',
-    };
+  let breakMinutes = 0;
+  if (breakStr !== '') {
+    if (!/^\d+$/.test(breakStr)) {
+      return {
+        startTime: startStr,
+        endTime: endStr,
+        isOvernight: false,
+        totalSpanMinutes: 0,
+        breakMinutes: 0,
+        netWorkMinutes: 0,
+        hours: 0,
+        minutes: 0,
+        decimalHours: 0,
+        formattedDuration: '—',
+        calculationSteps: [],
+        errorMessage: 'Break duration must be a non-negative whole number of minutes.',
+      };
+    }
+    breakMinutes = Number(breakStr);
   }
 
-  // Handle overnight shifts:
+  // Handle shifts:
   // If endMins < startMins, shift spanned midnight (+ 1440 minutes)
-  // If endMins === startMins, treat as 24-hour shift (or 0 if break is 0)
+  // If endMins === startMins, treat as a 0-hour span (0h 0m when break is 0; rejects >0 break below)
   let isOvernight = false;
   let totalSpanMinutes = endMins - startMins;
 
@@ -129,10 +134,24 @@ export function calculateWorkHours(input: WorkHoursInput): WorkHoursResult {
 
   let estimatedGrossPay: number | undefined = undefined;
   if (rateStr !== '') {
-    const rate = parseFloat(rateStr);
-    if (!isNaN(rate) && rate >= 0) {
-      estimatedGrossPay = decimalHours * rate;
+    if (!/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(rateStr)) {
+      return {
+        startTime: startStr,
+        endTime: endStr,
+        isOvernight,
+        totalSpanMinutes,
+        breakMinutes,
+        netWorkMinutes: 0,
+        hours: 0,
+        minutes: 0,
+        decimalHours: 0,
+        formattedDuration: '—',
+        calculationSteps: [],
+        errorMessage: 'Optional hourly wage must be a non-negative number.',
+      };
     }
+    const rate = Number(rateStr);
+    estimatedGrossPay = decimalHours * rate;
   }
 
   const format12h = (m: number) => {

@@ -21,12 +21,16 @@ export interface TipResult {
 export function calculateTip(input: TipInput): TipResult {
   const billStr = (input.billAmount ?? '').trim();
   const peopleStr = (input.peopleCount ?? '').trim();
-  const activeTipPct = input.isCustom ? parseFloat(input.customTip ?? '0') : input.tipPercent;
+  const customTipStr = (input.customTip ?? '').trim();
+  const isStrictNumber = (s: string) => /^(?:\d+(?:\.\d+)?|\.\d+)$/.test(s);
+  const activeTipPct = input.isCustom
+    ? (customTipStr !== '' && isStrictNumber(customTipStr) ? Number(customTipStr) : NaN)
+    : input.tipPercent;
 
   if (billStr === '') {
     return {
       bill: 0,
-      tipPercent: activeTipPct,
+      tipPercent: isNaN(activeTipPct) ? 0 : activeTipPct,
       tipAmount: 0,
       totalBill: 0,
       amountPerPerson: 0,
@@ -36,13 +40,13 @@ export function calculateTip(input: TipInput): TipResult {
     };
   }
 
-  const bill = parseFloat(billStr);
-  const people = parseInt(peopleStr, 10);
+  const bill = isStrictNumber(billStr) ? Number(billStr) : NaN;
+  const people = /^\d+$/.test(peopleStr) ? Number(peopleStr) : NaN;
 
   if (isNaN(bill) || bill < 0) {
     return {
       bill: 0,
-      tipPercent: activeTipPct,
+      tipPercent: isNaN(activeTipPct) ? 0 : activeTipPct,
       tipAmount: 0,
       totalBill: 0,
       amountPerPerson: 0,
@@ -74,15 +78,16 @@ export function calculateTip(input: TipInput): TipResult {
       amountPerPerson: bill,
       tipPerPerson: 0,
       calculationSteps: [],
-      errorMessage: 'Number of people must be at least 1.',
+      errorMessage: 'Number of people must be a whole number of at least 1.',
     };
   }
 
   const rawTip = (bill * activeTipPct) / 100;
   let totalBill = bill + rawTip;
 
-  if (input.roundUp) {
-    totalBill = Math.ceil(totalBill);
+  if (input.roundUp && totalBill > 1e-9) {
+    const rounded = Math.round(totalBill);
+    totalBill = Math.abs(totalBill - rounded) < 1e-9 ? rounded : Math.ceil(totalBill);
   }
 
   const finalTipAmount = Math.max(0, totalBill - bill);

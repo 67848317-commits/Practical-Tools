@@ -90,8 +90,14 @@ export function calculateFlooring(input: FlooringInput): FlooringResult {
   let totalPurchasedArea: number | undefined = undefined;
   let overageArea: number | undefined = undefined;
 
+  const safeCeil = (val: number): number => {
+    if (val <= 1e-9) return 0;
+    const rounded = Math.round(val);
+    return Math.abs(val - rounded) < 1e-9 ? rounded : Math.ceil(val);
+  };
+
   if (boxSize && !isNaN(boxSize) && boxSize > 0) {
-    boxesNeeded = Math.ceil(recommendedMaterial / boxSize);
+    boxesNeeded = safeCeil(recommendedMaterial / boxSize);
     totalPurchasedArea = boxesNeeded * boxSize;
     overageArea = totalPurchasedArea - basicFloorArea;
   }

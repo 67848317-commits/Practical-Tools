@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { RotateCcw, AlertCircle, Info, CheckCircle2 } from 'lucide-react';
+import { RotateCcw, AlertCircle, Info } from 'lucide-react';
+import { calculateSalary } from '../../lib/calculators/salary';
 
 export const SalaryCalculator: React.FC = () => {
   const [annualSalaryInput, setAnnualSalaryInput] = useState<string>('65000');
@@ -12,38 +13,27 @@ export const SalaryCalculator: React.FC = () => {
     setWeeksPerYearInput('52');
   };
 
-  const salary = parseFloat(annualSalaryInput);
-  const hpw = parseFloat(hoursPerWeekInput);
-  const wpy = parseFloat(weeksPerYearInput);
+  const result = calculateSalary({
+    annualSalary: annualSalaryInput,
+    hoursPerWeek: hoursPerWeekInput,
+    weeksPerYear: weeksPerYearInput,
+  });
 
-  let errorMsg = '';
-  if (annualSalaryInput.trim() === '' || isNaN(salary) || salary <= 0) {
-    errorMsg = 'Please enter a valid annual salary greater than zero.';
-  } else if (hoursPerWeekInput.trim() === '' || isNaN(hpw) || hpw <= 0 || hpw > 168) {
-    errorMsg = 'Hours per week must be between 1 and 168 hours.';
-  } else if (weeksPerYearInput.trim() === '' || isNaN(wpy) || wpy <= 0 || wpy > 52) {
-    errorMsg = 'Working weeks per year must be between 1 and 52 weeks.';
-  }
-
-  // Formula strictly as specified:
-  // Annual salary / (hours per week × weeks per year)
-  const totalAnnualHours = !errorMsg ? hpw * wpy : 0;
-  const estimatedHourlyRate = !errorMsg && totalAnnualHours > 0 ? salary / totalAnnualHours : 0;
-
-  // Secondary breakdown intervals for practical budgeting
-  const weeklyGross = estimatedHourlyRate * hpw;
-  const biweeklyGross = !errorMsg ? salary / 26 : 0;
-  const monthlyGross = !errorMsg ? salary / 12 : 0;
+  const errorMsg = result.errorMessage ?? '';
+  const {
+    annualSalary: salary,
+    hoursPerWeek: hpw,
+    weeksPerYear: wpy,
+    totalAnnualHours,
+    hourlyRate: estimatedHourlyRate,
+    weeklyGross,
+    biweeklyGross,
+    monthlyGross,
+    calculationSteps,
+  } = result;
 
   const formatCurrency = (val: number) =>
     val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  const calculationSteps = !errorMsg
-    ? [
-        `Calculate total annual work hours: ${hpw} hours/week × ${wpy} weeks/year = ${totalAnnualHours.toLocaleString()} hours`,
-        `Calculate estimated hourly rate: $${formatCurrency(salary)} ÷ ${totalAnnualHours.toLocaleString()} hours = $${formatCurrency(estimatedHourlyRate)}/hr`,
-      ]
-    : [];
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs" id="salary-calculator-widget">
@@ -151,7 +141,7 @@ export const SalaryCalculator: React.FC = () => {
                   ${formatCurrency(monthlyGross)}
                 </div>
                 <span className="text-xs text-slate-400 mt-1 block">
-                  Bi-weekly (26 paychecks): ${formatCurrency(biweeklyGross)}
+                  Bi-weekly ({wpy === 52 ? '26 paychecks' : '2-week rate'}): ${formatCurrency(biweeklyGross)}
                 </span>
               </div>
             </div>
@@ -200,7 +190,7 @@ export const SalaryCalculator: React.FC = () => {
                 <span className="font-mono font-semibold text-slate-900">${formatCurrency(weeklyGross)}</span>
               </div>
               <div className="flex justify-between items-center px-4 py-2.5">
-                <span className="text-slate-600 font-medium">Bi-Weekly Pay (26 pay periods)</span>
+                <span className="text-slate-600 font-medium">Bi-Weekly Pay ({wpy === 52 ? '26 pay periods' : '2 working weeks'})</span>
                 <span className="font-mono font-semibold text-slate-900">${formatCurrency(biweeklyGross)}</span>
               </div>
               <div className="flex justify-between items-center px-4 py-2.5 bg-slate-50/50">

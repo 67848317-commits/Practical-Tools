@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { RotateCcw, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { calculateDiscount } from '../../lib/calculators/discount';
 
 export const DiscountCalculator: React.FC = () => {
   const [originalPrice, setOriginalPrice] = useState<string>('89.99');
@@ -12,39 +13,25 @@ export const DiscountCalculator: React.FC = () => {
     setSalesTaxPercent('0');
   };
 
-  const price = parseFloat(originalPrice);
-  const discount = parseFloat(discountPercent);
-  const tax = parseFloat(salesTaxPercent) || 0;
+  const result = calculateDiscount({
+    originalPrice,
+    discountPercent,
+    salesTaxPercent,
+  });
 
-  let errorMsg = '';
-  if (originalPrice.trim() === '' || isNaN(price) || price < 0) {
-    errorMsg = 'Please enter a valid positive original price.';
-  } else if (discountPercent.trim() === '' || isNaN(discount) || discount < 0 || discount > 100) {
-    errorMsg = 'Discount percentage must be a valid number between 0% and 100%.';
-  } else if (tax < 0 || tax > 50) {
-    errorMsg = 'Optional sales tax rate must be between 0% and 50%.';
-  }
-
-  // Formulas strictly as specified:
-  // Discount amount = Original price × Discount percentage / 100
-  // Final price = Original price - Discount amount
-  const discountAmount = !errorMsg ? (price * discount) / 100 : 0;
-  const finalPrice = !errorMsg ? Math.max(0, price - discountAmount) : 0;
-  const taxAmount = !errorMsg && tax > 0 ? (finalPrice * tax) / 100 : 0;
-  const finalPriceWithTax = finalPrice + taxAmount;
+  const errorMsg = result.errorMessage ?? '';
+  const {
+    originalPrice: price,
+    discountPercent: discount,
+    discountAmount,
+    finalPrice,
+    taxAmount,
+    finalPriceWithTax,
+    calculationSteps,
+  } = result;
 
   const formatCurrency = (val: number) =>
     val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  const calculationSteps = !errorMsg
-    ? [
-        `Calculate discount amount: $${formatCurrency(price)} × ${discount}% ÷ 100 = $${formatCurrency(discountAmount)}`,
-        `Calculate final price: $${formatCurrency(price)} - $${formatCurrency(discountAmount)} = $${formatCurrency(finalPrice)}`,
-        ...(tax > 0
-          ? [`Add sales tax (${tax}%): $${formatCurrency(finalPrice)} + $${formatCurrency(taxAmount)} = $${formatCurrency(finalPriceWithTax)}`]
-          : []),
-      ]
-    : [];
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs" id="discount-calculator-widget">
@@ -148,16 +135,15 @@ export const DiscountCalculator: React.FC = () => {
       ) : (
         <div className="p-6 rounded-xl bg-slate-900 text-white mb-6" aria-live="polite">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
-            {/* Output 1: Final Price */}
             <div>
               <span className="text-xs uppercase font-semibold tracking-wider text-slate-400 block mb-1">
-                Final Price {tax > 0 ? '(With Tax)' : ''}
+                Final Price {taxAmount > 0 ? '(With Tax)' : ''}
               </span>
               <div className="text-3xl sm:text-4xl font-bold font-mono text-emerald-400 break-words">
                 ${formatCurrency(finalPriceWithTax)}
               </div>
               <span className="text-xs text-slate-400 mt-1 block">
-                Original price: ${formatCurrency(price)} {tax > 0 ? `($${formatCurrency(finalPrice)} before tax)` : ''}
+                Original price: ${formatCurrency(price)} {taxAmount > 0 ? `($${formatCurrency(finalPrice)} before tax)` : ''}
               </span>
             </div>
 

@@ -115,8 +115,14 @@ export function calculateTile(input: TileInput): TileResult {
     exactTiles = roomAreaSqFtOrM2 / tileAreaSqFtOrM2;
   }
 
-  const baseTilesNeeded = Math.ceil(exactTiles);
-  const recommendedTiles = Math.ceil(exactTiles * (1 + wastePercent / 100));
+  const safeCeil = (val: number): number => {
+    if (val <= 1e-9) return 0;
+    const rounded = Math.round(val);
+    return Math.abs(val - rounded) < 1e-9 ? rounded : Math.ceil(val);
+  };
+
+  const baseTilesNeeded = safeCeil(exactTiles);
+  const recommendedTiles = safeCeil(exactTiles * (1 + wastePercent / 100));
 
   const roomUnit = unit === 'imperial' ? 'sq ft' : 'm²';
   const tileSmallUnit = unit === 'imperial' ? 'sq in' : 'cm²';

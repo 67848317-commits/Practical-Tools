@@ -18,6 +18,7 @@ import { calculateCookingConverter } from '../src/lib/calculators/cookingConvert
 import { calculateCupsToGrams } from '../src/lib/calculators/cupsToGrams';
 import { calculateWorkHours } from '../src/lib/calculators/workHours';
 import { calculateGpa } from '../src/lib/calculators/gpa';
+import { SOURCE_INVENTORY } from '../src/data/sources';
 
 console.log('Running Automated Regression Suite for all 20 Calculators...\n');
 
@@ -126,6 +127,7 @@ test('2. Discount Calculator (normal, zero, boundary, invalid, special cases)', 
   assert(Boolean(calculateDiscount({ originalPrice: 'abc', discountPercent: '20' }).errorMessage), 'Expected error for NaN price');
   assert(Boolean(calculateDiscount({ originalPrice: '100', discountPercent: '-5' }).errorMessage), 'Expected error for negative discount');
   assert(Boolean(calculateDiscount({ originalPrice: '100', discountPercent: '10', salesTaxPercent: '-1' }).errorMessage), 'Expected error for negative tax');
+  assert(Boolean(calculateDiscount({ originalPrice: '100', discountPercent: '10', salesTaxPercent: 'abc' }).errorMessage), 'Expected error for NaN tax');
 
   // Special case: post-discount sales tax
   const withTax = calculateDiscount({ originalPrice: '100', discountPercent: '20', salesTaxPercent: '8' });
@@ -161,14 +163,19 @@ test('3. Tip Calculator (normal, zero, boundary, invalid, special cases)', () =>
   assert(Boolean(calculateTip({ billAmount: '-25', tipPercent: 15, peopleCount: '1' }).errorMessage), 'Expected error for negative bill');
   assert(Boolean(calculateTip({ billAmount: 'abc', tipPercent: 15, peopleCount: '1' }).errorMessage), 'Expected error for NaN bill');
   assert(Boolean(calculateTip({ billAmount: '50', tipPercent: 15, isCustom: true, customTip: '-5', peopleCount: '1' }).errorMessage), 'Expected error for negative custom tip');
+  assert(Boolean(calculateTip({ billAmount: '50', tipPercent: 15, isCustom: true, customTip: 'abc', peopleCount: '1' }).errorMessage), 'Expected error for non-numeric custom tip');
+  assert(Boolean(calculateTip({ billAmount: '50', tipPercent: 15, peopleCount: '2.5' }).errorMessage), 'Expected error for fractional people count');
 
-  // Special cases: custom tip percentage & roundUp
+  // Special cases: custom tip percentage & roundUp (including exact whole dollar preservation)
   const custom = calculateTip({ billAmount: '80', tipPercent: 15, isCustom: true, customTip: '22.5', peopleCount: '2' });
   assertNear(custom.tipAmount, 18, 0.001, 'Custom 22.5% tip');
 
   const rounded = calculateTip({ billAmount: '43', tipPercent: 15, peopleCount: '1', roundUp: true });
   // 43 + 6.45 = 49.45 -> ceil = 50 -> tip = 7
   assert(rounded.totalBill === 50 && rounded.tipAmount === 7, `Expected roundUp total 50/tip 7, got ${rounded.totalBill}/${rounded.tipAmount}`);
+
+  const exactRound = calculateTip({ billAmount: '50', tipPercent: 0, peopleCount: '1', roundUp: true });
+  assert(exactRound.totalBill === 50 && exactRound.tipAmount === 0, `Exact whole dollar should not round up: got ${exactRound.totalBill}`);
 });
 
 // ==========================================
@@ -197,9 +204,10 @@ test('4. Salary Calculator (normal, zero, boundary, invalid, special cases)', ()
   assert(Boolean(calculateSalary({ annualSalary: '-50000', hoursPerWeek: '40', weeksPerYear: '52' }).errorMessage), 'Expected error for negative salary');
   assert(Boolean(calculateSalary({ annualSalary: 'abc', hoursPerWeek: '40', weeksPerYear: '52' }).errorMessage), 'Expected error for NaN salary');
 
-  // Special case: unpaid vacation (50 weeks/year, 35 hours/week)
+  // Special case: unpaid vacation (50 weeks/year, 35 hours/week) and biweekly consistency
   const customWeeks = calculateSalary({ annualSalary: '52500', hoursPerWeek: '35', weeksPerYear: '50' });
   assert(customWeeks.totalAnnualHours === 1750 && customWeeks.hourlyRate === 30, 'Unpaid vacation weeks calculation failed');
+  assert(customWeeks.weeklyGross === 1050 && customWeeks.biweeklyGross === 2100, 'Biweekly gross must equal 2x weekly gross');
 });
 
 // ==========================================
@@ -266,6 +274,8 @@ test('6. Paint Calculator (normal, zero, boundary, invalid, special cases)', () 
   assert(Boolean(calculatePaint({ unit: 'imperial', length: '', width: '10', height: '8', doors: '0', windows: '0', coats: 2, coveragePerGallon: '350' }).errorMessage), 'Expected error for empty length');
   assert(Boolean(calculatePaint({ unit: 'imperial', length: '-10', width: '10', height: '8', doors: '0', windows: '0', coats: 2, coveragePerGallon: '350' }).errorMessage), 'Expected error for negative length');
   assert(Boolean(calculatePaint({ unit: 'imperial', length: '10', width: '10', height: '8', doors: '-1', windows: '0', coats: 2, coveragePerGallon: '350' }).errorMessage), 'Expected error for negative doors');
+  assert(Boolean(calculatePaint({ unit: 'imperial', length: '10', width: '10', height: '8', doors: '1.5', windows: '0', coats: 2, coveragePerGallon: '350' }).errorMessage), 'Expected error for fractional doors');
+  assert(Boolean(calculatePaint({ unit: 'imperial', length: '10', width: '10', height: '8', doors: '1abc', windows: '0', coats: 2, coveragePerGallon: '350' }).errorMessage), 'Expected error for malformed doors');
   assert(Boolean(calculatePaint({ unit: 'imperial', length: '10', width: '10', height: '8', doors: '0', windows: '0', coats: 2, coveragePerGallon: 'abc' }).errorMessage), 'Expected error for NaN coverage');
 
   // Special cases: custom opening area & metric liters
@@ -302,7 +312,10 @@ test('7. Flooring Calculator (normal, zero, boundary, invalid, special cases)', 
   assert(Boolean(calculateFlooring({ unit: 'feet', length: '-10', width: '10', wastePercent: '10' }).errorMessage), 'Expected error for negative length');
   assert(Boolean(calculateFlooring({ unit: 'feet', length: 'abc', width: '10', wastePercent: '10' }).errorMessage), 'Expected error for NaN length');
 
-  // Special cases: metric unit & optional boxSize/pricePerUnit omitted or zero
+  // Special cases: metric unit, float-safe exact box count (20x10 with 10% = 220 / 20 = 11), & optional boxSize/pricePerUnit
+  const exactBoxes = calculateFlooring({ unit: 'feet', length: '20', width: '10', wastePercent: '10', boxSize: '20' });
+  assert(!exactBoxes.errorMessage && exactBoxes.boxesNeeded === 11, `Expected exact 11 boxes without float overshoot, got ${exactBoxes.boxesNeeded}`);
+
   const metric = calculateFlooring({ unit: 'meters', length: '5', width: '4', wastePercent: '15' });
   assert(metric.areaUnit === 'm²' && metric.recommendedMaterial === 23 && metric.boxesNeeded === undefined && metric.totalEstimatedCost === undefined, 'Metric flooring failed');
 });
@@ -311,9 +324,12 @@ test('7. Flooring Calculator (normal, zero, boundary, invalid, special cases)', 
 // 8. TILE CALCULATOR
 // ==========================================
 test('8. Tile Calculator (normal, zero, boundary, invalid, special cases)', () => {
-  // Normal (note: 100 * 1.1 in IEEE-754 is 110.00000000000001 -> Math.ceil yields 111)
+  // Normal (exact 100 * 1.1 = 110 without IEEE-754 float overshoot to 111)
   const res = calculateTile({ unit: 'imperial', roomLength: '10', roomWidth: '10', tileLength: '12', tileWidth: '12', wastePercent: '10' });
-  assert(!res.errorMessage && res.roomAreaSqFtOrM2 === 100 && res.baseTilesNeeded === 100 && res.recommendedTiles === Math.ceil(100 * (1 + 10 / 100)), `Normal tile calc failed: got ${res.recommendedTiles}`);
+  assert(!res.errorMessage && res.roomAreaSqFtOrM2 === 100 && res.baseTilesNeeded === 100 && res.recommendedTiles === 110, `Normal tile calc failed: expected 110, got ${res.recommendedTiles}`);
+
+  const metricExact = calculateTile({ unit: 'metric', roomLength: '3', roomWidth: '3', tileLength: '30', tileWidth: '30', wastePercent: '10' });
+  assert(!metricExact.errorMessage && metricExact.recommendedTiles === 110, `Metric 3x3 exact tile calc failed: expected 110, got ${metricExact.recommendedTiles}`);
 
   // Zero values (0% waste valid; 0 room/tile dimension rejected)
   const zeroWaste = calculateTile({ unit: 'imperial', roomLength: '10', roomWidth: '10', tileLength: '12', tileWidth: '12', wastePercent: '0' });
@@ -368,7 +384,10 @@ test('9. Concrete Calculator (normal, zero, boundary, invalid, special cases)', 
   assert(Boolean(calculateConcrete({ lengthFeet: '-10', widthFeet: '10', depthInches: '4' }).errorMessage), 'Expected error for negative length');
   assert(Boolean(calculateConcrete({ lengthFeet: 'abc', widthFeet: '10', depthInches: '4' }).errorMessage), 'Expected error for NaN length');
 
-  // Special case: custom bag yields & mathematical weight consistency
+  // Special case: custom bag yields, mathematical weight consistency & float-safe exact multiple (9x10x4" + 10% = 33 cu ft / 0.60 = 55)
+  const exactBags = calculateConcrete({ lengthFeet: '9', widthFeet: '10', depthInches: '4', wastePercent: '10' });
+  assert(!exactBags.errorMessage && exactBags.bags80lb === 55, `Expected exact 55 80lb bags without float overshoot, got ${exactBags.bags80lb}`);
+
   const custom = calculateConcrete({ lengthFeet: '10', widthFeet: '10', depthInches: '4', wastePercent: '10', bagYield80lb: 0.55, bagYield60lb: 0.40, bagYield50lb: 0.35 });
   assert(custom.bags80lb === 67 && custom.totalWeightLbs80 === 67 * 80, 'Custom 80lb yield mismatch');
   assert(custom.bags60lb === 92 && custom.totalWeightLbs60 === 92 * 60, 'Custom 60lb yield mismatch');
@@ -562,11 +581,16 @@ test('15. Date Difference Calculator (normal, zero, boundary, invalid, special c
   const nonLeap = calculateDateDifference({ startDate: '2025-02-28', endDate: '2025-03-01', includeEndDate: false });
   assert(nonLeap.totalDays === 1, `Expected 1 day across Feb 2025, got ${nonLeap.totalDays}`);
 
-  // Invalid inputs
+  // Invalid inputs (including rolled nonexistent calendar dates and trailing characters)
   assert(Boolean(calculateDateDifference({ startDate: '', endDate: '2026-01-10' }).errorMessage), 'Expected error for empty startDate');
   assert(Boolean(calculateDateDifference({ startDate: '2026-01-01', endDate: '' }).errorMessage), 'Expected error for empty endDate');
   assert(Boolean(calculateDateDifference({ startDate: 'invalid', endDate: '2026-01-10' }).errorMessage), 'Expected error for malformed startDate');
   assert(Boolean(calculateDateDifference({ startDate: '2026-01', endDate: '2026-01-10' }).errorMessage), 'Expected error for incomplete date');
+  assert(Boolean(calculateDateDifference({ startDate: '2026-02-30', endDate: '2026-03-05' }).errorMessage), 'Expected error for nonexistent Feb 30');
+  assert(Boolean(calculateDateDifference({ startDate: '2025-02-29', endDate: '2025-03-05' }).errorMessage), 'Expected error for non-leap Feb 29 2025');
+  assert(Boolean(calculateDateDifference({ startDate: '2026-04-31', endDate: '2026-05-05' }).errorMessage), 'Expected error for nonexistent Apr 31');
+  assert(Boolean(calculateDateDifference({ startDate: '2026-13-01', endDate: '2026-12-31' }).errorMessage), 'Expected error for invalid month 13');
+  assert(Boolean(calculateDateDifference({ startDate: '2026-01-10abc', endDate: '2026-01-20' }).errorMessage), 'Expected error for trailing characters');
 
   // Special cases: reversed dates & inclusive toggle
   const reversed = calculateDateDifference({ startDate: '2026-01-10', endDate: '2026-01-01', includeEndDate: true });
@@ -605,6 +629,7 @@ test('16. Recipe Scale Calculator (normal, zero, boundary, invalid, special case
   assert(Boolean(calculateRecipeScale({ originalServings: '4', desiredServings: '8', ingredientQuantity: '-1' }).errorMessage), 'Expected error for negative quantity');
   assert(Boolean(calculateRecipeScale({ originalServings: '4', desiredServings: '8', ingredientQuantity: '1/0' }).errorMessage), 'Expected error for division by zero fraction 1/0');
   assert(Boolean(calculateRecipeScale({ originalServings: '4', desiredServings: '8', ingredientQuantity: 'abc' }).errorMessage), 'Expected error for NaN quantity');
+  assert(Boolean(calculateRecipeScale({ originalServings: '4', desiredServings: '8', ingredientQuantity: '2abc' }).errorMessage), 'Expected error for trailing garbage 2abc');
 });
 
 // ==========================================
@@ -668,8 +693,10 @@ test('18. Cups to Grams Converter (normal, zero, boundary, invalid, special case
   assert(Boolean(calculateCupsToGrams({ cups: '', ingredientId: 'all_purpose_flour' }).errorMessage), 'Expected error for empty cups');
   assert(Boolean(calculateCupsToGrams({ cups: '-1', ingredientId: 'all_purpose_flour' }).errorMessage), 'Expected error for negative cups');
   assert(Boolean(calculateCupsToGrams({ cups: '1/0', ingredientId: 'all_purpose_flour' }).errorMessage), 'Expected error for 1/0 fraction');
+  assert(Boolean(calculateCupsToGrams({ cups: '2abc', ingredientId: 'all_purpose_flour' }).errorMessage), 'Expected error for trailing garbage 2abc');
   assert(Boolean(calculateCupsToGrams({ mode: 'grams_to_cups', gramsInput: '', ingredientId: 'all_purpose_flour' }).errorMessage), 'Expected error for empty grams');
   assert(Boolean(calculateCupsToGrams({ mode: 'grams_to_cups', gramsInput: '-50', ingredientId: 'all_purpose_flour' }).errorMessage), 'Expected error for negative grams');
+  assert(Boolean(calculateCupsToGrams({ mode: 'grams_to_cups', gramsInput: '240abc', ingredientId: 'all_purpose_flour' }).errorMessage), 'Expected error for malformed grams 240abc');
 });
 
 // ==========================================
@@ -701,8 +728,13 @@ test('19. Work Hours Calculator (normal, zero, boundary, invalid, special cases)
   assert(Boolean(calculateWorkHours({ startTime: '', endTime: '17:00', breakMinutes: '0' }).errorMessage), 'Expected error for empty startTime');
   assert(Boolean(calculateWorkHours({ startTime: '25:00', endTime: '17:00', breakMinutes: '0' }).errorMessage), 'Expected error for 25:00');
   assert(Boolean(calculateWorkHours({ startTime: '09:60', endTime: '17:00', breakMinutes: '0' }).errorMessage), 'Expected error for 09:60');
+  assert(Boolean(calculateWorkHours({ startTime: '09abc:00', endTime: '17:00', breakMinutes: '0' }).errorMessage), 'Expected error for 09abc:00');
+  assert(Boolean(calculateWorkHours({ startTime: '09:00', endTime: '17:30xyz', breakMinutes: '0' }).errorMessage), 'Expected error for 17:30xyz');
   assert(Boolean(calculateWorkHours({ startTime: 'invalid', endTime: '17:00', breakMinutes: '0' }).errorMessage), 'Expected error for invalid format');
   assert(Boolean(calculateWorkHours({ startTime: '09:00', endTime: '17:00', breakMinutes: '-15' }).errorMessage), 'Expected error for negative break');
+  assert(Boolean(calculateWorkHours({ startTime: '09:00', endTime: '17:00', breakMinutes: '30abc' }).errorMessage), 'Expected error for malformed break 30abc');
+  assert(Boolean(calculateWorkHours({ startTime: '09:00', endTime: '17:00', breakMinutes: '30', hourlyRate: '-10' }).errorMessage), 'Expected error for negative hourly rate');
+  assert(Boolean(calculateWorkHours({ startTime: '09:00', endTime: '17:00', breakMinutes: '30', hourlyRate: '25abc' }).errorMessage), 'Expected error for malformed hourly rate');
 
   // Special cases: overnight shift + hourly gross pay
   const overnight = calculateWorkHours({ startTime: '22:00', endTime: '06:00', breakMinutes: '30', hourlyRate: '20' });
@@ -767,7 +799,19 @@ test('20. GPA Calculator (normal, zero, boundary, invalid, special cases)', () =
   assertNear(weightedMix.weightedGpa, 4.25, 0.001, 'Mixed weighted GPA');
 });
 
-console.log(`\nResults: ${passed}/${total} test suites passed (${total} calculators verified).\n`);
+// ==========================================
+// 21. SOURCE & DEFAULT INVENTORY COMPLETENESS
+// ==========================================
+test('21. Source & Default Inventory integrity', () => {
+  assert(SOURCE_INVENTORY.length >= 15, `Expected at least 15 inventory entries, got ${SOURCE_INVENTORY.length}`);
+  for (const entry of SOURCE_INVENTORY) {
+    assert(Boolean(entry.id && entry.calculator && entry.parameterName && entry.sourceTitle), `Incomplete source entry: ${entry.id}`);
+    assert(entry.verificationStatus === 'verified' || entry.verificationStatus === 'illustrative', `Invalid status on ${entry.id}`);
+    assert(/^\d{4}-\d{2}-\d{2}$/.test(entry.dateChecked), `Invalid dateChecked on ${entry.id}`);
+  }
+});
+
+console.log(`\nResults: ${passed}/${total} test suites passed (${total} checks verified).\n`);
 if (passed !== total) {
   process.exit(1);
 }

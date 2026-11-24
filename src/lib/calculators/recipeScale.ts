@@ -69,7 +69,8 @@ export function parseQuantity(str: string): number {
     return num / den;
   }
 
-  return parseFloat(trimmed);
+  if (!/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(trimmed)) return NaN;
+  return Number(trimmed);
 }
 
 export function calculateRecipeScale(input: RecipeScaleInput): RecipeScaleResult {

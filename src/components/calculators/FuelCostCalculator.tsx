@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { RotateCcw, AlertCircle, Info, Fuel, CheckCircle2 } from 'lucide-react';
+import { RotateCcw, AlertCircle, Info, CheckCircle2 } from 'lucide-react';
+import { calculateFuel, FuelUnitSystem } from '../../lib/calculators/fuel';
 
 export const FuelCostCalculator: React.FC = () => {
-  const [unitSystem, setUnitSystem] = useState<'us' | 'metric'>('us');
+  const [unitSystem, setUnitSystem] = useState<FuelUnitSystem>('us');
   const [distance, setDistance] = useState<string>('300');
   const [isRoundTrip, setIsRoundTrip] = useState<boolean>(false);
   const [efficiency, setEfficiency] = useState<string>('28');
@@ -18,48 +19,30 @@ export const FuelCostCalculator: React.FC = () => {
     setPassengers('1');
   };
 
+  const result = calculateFuel({
+    unitSystem,
+    distance,
+    efficiency,
+    fuelPrice,
+    passengers,
+    isRoundTrip,
+  });
+
+  const errorMsg = result.errorMessage ?? '';
+  const {
+    effectiveDistance,
+    estimatedFuelUsed,
+    estimatedTripCost,
+    costPerPerson,
+    distanceUnit,
+    volumeUnit,
+    efficiencyUnit: efficiencyLabel,
+    calculationSteps,
+  } = result;
+
   const dist = parseFloat(distance);
   const eff = parseFloat(efficiency);
-  const price = parseFloat(fuelPrice);
-  const numPassengers = parseInt(passengers, 10);
-
-  let errorMsg = '';
-  if (distance.trim() === '' || isNaN(dist) || dist <= 0) {
-    errorMsg = `Please enter a valid trip distance greater than zero (${unitSystem === 'us' ? 'miles' : 'km'}).`;
-  } else if (efficiency.trim() === '' || isNaN(eff) || eff <= 0) {
-    errorMsg = unitSystem === 'us'
-      ? 'Vehicle fuel economy must be greater than zero (MPG).'
-      : 'Vehicle fuel consumption must be greater than zero (L/100 km).';
-  } else if (fuelPrice.trim() === '' || isNaN(price) || price < 0) {
-    errorMsg = `Please enter a valid fuel price (${unitSystem === 'us' ? '$/gallon' : '$/liter'}).`;
-  } else if (passengers.trim() === '' || isNaN(numPassengers) || numPassengers < 1) {
-    errorMsg = 'Passenger count must be at least 1.';
-  }
-
-  // Calculation per unit system:
-  // US:
-  // Fuel used (gallons) = Total Distance (miles) / MPG
-  // Trip cost ($) = Fuel used × Price per gallon
-  // Metric:
-  // Fuel used (liters) = (Total Distance (km) × L/100km) / 100
-  // Trip cost ($) = Fuel used × Price per liter
-  const effectiveDistance = !errorMsg ? (isRoundTrip ? dist * 2 : dist) : 0;
-  let estimatedFuelUsed = 0;
-
-  if (!errorMsg && eff > 0) {
-    if (unitSystem === 'us') {
-      estimatedFuelUsed = effectiveDistance / eff;
-    } else {
-      estimatedFuelUsed = (effectiveDistance * eff) / 100;
-    }
-  }
-
-  const estimatedTripCost = !errorMsg ? estimatedFuelUsed * price : 0;
-  const costPerPerson = !errorMsg && numPassengers > 0 ? estimatedTripCost / numPassengers : 0;
-
-  const distanceUnit = unitSystem === 'us' ? 'miles' : 'km';
-  const volumeUnit = unitSystem === 'us' ? 'Gallons' : 'Liters';
-  const efficiencyLabel = unitSystem === 'us' ? 'MPG' : 'L / 100 km';
+  const numPassengers = parseInt(passengers, 10) || 1;
   const priceUnit = unitSystem === 'us' ? 'per gallon' : 'per liter';
 
   const formatCurrency = (val: number) =>
@@ -67,26 +50,6 @@ export const FuelCostCalculator: React.FC = () => {
 
   const formatNum = (val: number, decimals: number = 2) =>
     val.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-
-  const calculationSteps = !errorMsg
-    ? unitSystem === 'us'
-      ? [
-          `Total distance driven = ${formatNum(effectiveDistance, 0)} ${distanceUnit}${isRoundTrip ? ' (round-trip)' : ''}`,
-          `Estimated fuel used = ${formatNum(effectiveDistance, 0)} miles ÷ ${eff} MPG = ${formatNum(estimatedFuelUsed, 2)} Gallons`,
-          `Estimated trip cost = ${formatNum(estimatedFuelUsed, 2)} Gallons × $${formatCurrency(price)}/gal = $${formatCurrency(estimatedTripCost)}`,
-          ...(numPassengers > 1
-            ? [`Split cost per person = $${formatCurrency(estimatedTripCost)} ÷ ${numPassengers} travelers = $${formatCurrency(costPerPerson)}/person`]
-            : []),
-        ]
-      : [
-          `Total distance driven = ${formatNum(effectiveDistance, 0)} ${distanceUnit}${isRoundTrip ? ' (round-trip)' : ''}`,
-          `Estimated fuel used = (${formatNum(effectiveDistance, 0)} km × ${eff} L/100km) ÷ 100 = ${formatNum(estimatedFuelUsed, 2)} Liters`,
-          `Estimated trip cost = ${formatNum(estimatedFuelUsed, 2)} Liters × $${formatCurrency(price)}/L = $${formatCurrency(estimatedTripCost)}`,
-          ...(numPassengers > 1
-            ? [`Split cost per person = $${formatCurrency(estimatedTripCost)} ÷ ${numPassengers} travelers = $${formatCurrency(costPerPerson)}/person`]
-            : []),
-        ]
-    : [];
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs" id="fuel-calculator-widget">

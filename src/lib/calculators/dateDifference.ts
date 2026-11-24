@@ -43,13 +43,23 @@ export function calculateDateDifference(input: DateDifferenceInput): DateDiffere
     };
   }
 
-  // Parse YYYY-MM-DD using UTC to avoid timezone drift
+  // Parse YYYY-MM-DD strictly and verify calendar date (rejects rolled dates like 2026-02-30 or trailing characters)
   const parseDateUTC = (dStr: string) => {
-    const parts = dStr.split('-').map((p) => parseInt(p, 10));
-    if (parts.length !== 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) {
+    const match = dStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return null;
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    const d = new Date(Date.UTC(year, month - 1, day));
+    if (
+      d.getUTCFullYear() !== year ||
+      d.getUTCMonth() !== month - 1 ||
+      d.getUTCDate() !== day
+    ) {
       return null;
     }
-    return new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+    return d;
   };
 
   const startUTC = parseDateUTC(startStr);
@@ -87,7 +97,7 @@ export function calculateDateDifference(input: DateDifferenceInput): DateDiffere
   const rawDiffDays = Math.round((d2.getTime() - d1.getTime()) / msPerDay);
   const totalDays = isInclusive ? rawDiffDays + 1 : rawDiffDays;
 
-  // Calculate business days (Monday to Friday)
+  // Calculate business days (Monday to Friday; weekends excluded, public holidays not deducted)
   let businessDays = 0;
   let weekendDays = 0;
   const cur = new Date(d1.getTime());
@@ -107,15 +117,11 @@ export function calculateDateDifference(input: DateDifferenceInput): DateDiffere
   const remainingDays = totalDays % 7;
   const monthsApprox = parseFloat((totalDays / 30.4375).toFixed(1));
 
-  const conventionNote = isInclusive
-    ? 'Inclusive counting convention: both the start date and the end date are included (+1 day).'
-    : 'Standard exclusive convention: calculates time elapsed between start and end (End date - Start date).';
-
   const steps = [
     `Baseline difference: |${endStr} - ${startStr}| = ${rawDiffDays} calendar days`,
     isInclusive ? `Inclusive toggle enabled: ${rawDiffDays} + 1 = ${totalDays} total days` : `Exclusive counting: ${totalDays} total days`,
     `Breakdown: ${weeks} full ${weeks === 1 ? 'week' : 'weeks'} and ${remainingDays} ${remainingDays === 1 ? 'day' : 'days'}`,
-    `Workday breakdown: ${businessDays} business days (Mon–Fri) and ${weekendDays} weekend days`,
+    `Workday breakdown: ${businessDays} weekday days (Mon–Fri, weekends excluded; public holidays not deducted) and ${weekendDays} weekend days`,
   ];
 
   return {

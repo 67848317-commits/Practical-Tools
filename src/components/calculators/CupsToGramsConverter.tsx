@@ -30,7 +30,7 @@ export const CupsToGramsConverter: React.FC = () => {
   return (
     <CalculatorCard
       title="Cups to Grams Baking Ingredient Converter"
-      description="Convert recipe cup volumes to weight in grams and ounces using verified density tables from King Arthur Baking & USDA."
+      description="Convert recipe cup volumes to weight in grams and ounces using King Arthur Baking, USDA FoodData Central, and culinary reference densities."
       onReset={handleReset}
       errorMessage={result.errorMessage}
     >
@@ -150,7 +150,7 @@ export const CupsToGramsConverter: React.FC = () => {
           <div className="p-4 bg-amber-50/80 border border-amber-200 rounded-2xl text-xs text-slate-800 space-y-2">
             <div className="flex items-center gap-1.5 font-bold text-amber-950">
               <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>Critical Measuring Technique: Spooned vs. Scooped</span>
+              <span>Measuring Example (All-Purpose Flour): Spooned vs. Scooped</span>
             </div>
             <div className="grid grid-cols-2 gap-3 pt-1">
               <div className="bg-white/90 p-2.5 rounded-lg border border-amber-100">
@@ -209,7 +209,7 @@ export const CupsToGramsConverter: React.FC = () => {
                     {
                       label: 'Standard Reference',
                       value: `${result.ingredient.gramsPerCup} g/cup`,
-                      hint: 'Spooned and leveled',
+                      hint: result.ingredient.id.includes('flour') ? 'Spooned and leveled' : 'Culinary reference density',
                     },
                     {
                       label: 'Pounds Equivalent',

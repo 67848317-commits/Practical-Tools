@@ -3,12 +3,17 @@ import { CalculatorCard, FormField, ResultBox } from '../CalculatorCard';
 import { calculateDateDifference } from '../../lib/calculators/dateDifference';
 
 export const DateDifferenceCalculator: React.FC = () => {
-  // Default start to today, end to 30 days from now
-  const getTodayStr = () => new Date().toISOString().split('T')[0];
+  const formatLocalYMD = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const getTodayStr = () => formatLocalYMD(new Date());
   const getFutureStr = (days: number) => {
     const d = new Date();
     d.setDate(d.getDate() + days);
-    return d.toISOString().split('T')[0];
+    return formatLocalYMD(d);
   };
 
   const [startDate, setStartDate] = useState<string>(getTodayStr());
@@ -123,7 +128,7 @@ export const DateDifferenceCalculator: React.FC = () => {
                     {
                       label: 'Business Days (Mon–Fri)',
                       value: `${result.businessDays.toLocaleString()} Days`,
-                      hint: 'Workdays (excludes Sat/Sun)',
+                      hint: 'Excludes Sat/Sun (holidays not deducted)',
                     },
                     {
                       label: 'Weekend Days',

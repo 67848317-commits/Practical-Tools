@@ -1,5 +1,6 @@
 import React from 'react';
 import { siteConfig } from '../data/site';
+import { SOURCE_INVENTORY } from '../data/sources';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { ShieldCheck, Target, Sparkles, BookOpen, CheckCircle2, Lock, Cpu, ExternalLink } from 'lucide-react';
 
@@ -205,7 +206,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Spreading rates (350–400 sq ft/gal on smooth primed drywall; 250–300 sq ft/gal on textured surfaces; 150–200 sq ft/gal on masonry/stucco) reflect architectural coatings manufacturer Technical Data Sheets (Sherwin-Williams and Benjamin Moore). The suggested retail package combination (whole gallons plus quarts for fractional needs up to 0.5 gal) reflects standard retail packaging (1 gallon = 4 quarts = 128 fl oz) to provide sufficient volume while reducing leftover paint, without making unverified price-saving claims.
+                Our smooth interior latex default (350 sq ft/gal) sits within standard architectural coatings Technical Data Sheet ranges (Sherwin-Williams interior latex PDS typically 350–400 sq ft/gal; Benjamin Moore Aura 350–400 and Regal Select 400–450 sq ft/gal). Textured (275 sq ft/gal), rough masonry (175 sq ft/gal), and metric presets (8.5, 6.7, and 4.3 m²/L) are illustrative editable planning estimates because actual spreading rates vary substantially by substrate porosity and sheen. The suggested retail package combination (whole gallons plus quarts for fractional needs up to 0.5 gal) reflects standard retail container sizes (1 gallon = 4 quarts = 128 fl oz) without making unverified price-saving claims.
               </p>
             </div>
 
@@ -213,9 +214,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
             <div className="p-5 rounded-xl bg-slate-50 border border-slate-200/80">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
                 <div>
-                  <span className="font-bold text-slate-900 text-sm sm:text-base">Culinary Bulk Densities &amp; Ingredient References</span>
+                  <span className="font-bold text-slate-900 text-sm sm:text-base">Culinary Bulk Densities &amp; Cup Volume Definitions</span>
                   <span className="ml-2 text-[10px] uppercase font-semibold text-purple-700 bg-purple-100/70 px-2 py-0.5 rounded">
-                    Ingredient Weight Reference
+                    Ingredient Weight &amp; Volume Reference
                   </span>
                 </div>
                 <span className="text-[11px] font-mono text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded w-fit">
@@ -223,7 +224,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-3">
-                Ingredient density conversions in our culinary utilities are referenced against respected professional baking guidelines and public food science databases. The King Arthur Baking Company Master Ingredient Weight Chart serves as a widely recognized professional baking reference for common home and commercial baking conversions (it is a practical industry reference, not a regulatory standards authority). The USDA FoodData Central database is maintained as a comprehensive public government food composition database rather than an official culinary conversion standard. Different ingredients across our broader catalog (such as sugars, leaveners, dairy, and liquids) reference respective food science benchmarks rather than a single source. For all-purpose flour, calculations explicitly account for measurement technique: gently &ldquo;spooned and leveled&rdquo; flour weighs approximately 120 grams per US cup (4.25 oz), whereas compacted &ldquo;dipped and scooped&rdquo; flour weighs 140 to 150 grams per cup, which can cause dense or dry baked goods.
+                Our Cups-to-Grams and Cooking converters distinguish verified references from rounded culinary defaults. Verified anchors include King Arthur Baking Weight Chart all-purpose flour (120 g/cup spooned and leveled; USDA FoodData Central FDC ID 168893 uses 125 g/cup) and butter (227 g/cup = 2 US sticks), USDA FoodData Central granulated sugar (FDC ID 169655: 200 g/cup; King Arthur lists 198 g/cup), and the FDA Nutrition Labeling Legal Cup for water (21 CFR 101.9: 240 mL = 240 g). Our liquid Cooking Unit Converter uses exact NIST US Customary ratios (1 US customary cup = 236.588 mL, ~1.4% smaller than the 240 mL FDA legal cup and smaller than the 250 mL Commonwealth metric cup). Other dry baking entries—bread flour (125 g vs. King Arthur 120 g), packed brown sugar (220 g vs. King Arthur 213 g), powdered sugar (120 g vs. King Arthur 113 g unsifted), cocoa (85 g vs. King Arthur 84 g / USDA 86 g), rolled oats (90 g vs. King Arthur 89 g), and whole milk (245 g vs. USDA 244 g)—are labeled as rounded culinary planning defaults within typical kitchen variance.
               </p>
               <div className="flex flex-wrap gap-3 pt-2 border-t border-slate-200/60 text-xs">
                 <a
@@ -242,10 +243,68 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium hover:underline"
                 >
-                  <span>USDA FoodData Central: All-Purpose Wheat Flour Density (Government Food Database, FDC ID 168893)</span>
+                  <span>USDA FoodData Central: All-Purpose Flour (FDC ID 168893)</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+                <span className="text-slate-300">|</span>
+                <a
+                  href="https://fdc.nal.usda.gov/fdc-app.html#/food-details/169655/nutrients"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium hover:underline"
+                >
+                  <span>USDA FoodData Central: Granulated Sugar (FDC ID 169655)</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               </div>
+            </div>
+          </div>
+
+          {/* Verified vs Illustrative Default Inventory Table */}
+          <div className="mt-8 pt-6 border-t border-slate-200">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2">
+              Verified Benchmarks vs. Illustrative Planning Defaults
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 mb-4">
+              Every preset and default factor across our calculators is classified below by whether it comes from a verified external document or serves as an editable illustrative planning assumption:
+            </p>
+            <div className="overflow-x-auto border border-slate-200 rounded-xl">
+              <table className="min-w-full divide-y divide-slate-200 text-xs">
+                <thead className="bg-slate-50 text-slate-700 font-semibold text-left">
+                  <tr>
+                    <th className="px-3.5 py-2.5">Calculator &amp; Parameter</th>
+                    <th className="px-3.5 py-2.5">Value Used</th>
+                    <th className="px-3.5 py-2.5">Classification</th>
+                    <th className="px-3.5 py-2.5">Source / Basis</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {SOURCE_INVENTORY.map((item) => (
+                    <tr key={item.id} className="align-top">
+                      <td className="px-3.5 py-2.5 font-medium text-slate-900">
+                        <div>{item.calculator}</div>
+                        <div className="text-[11px] font-normal text-slate-500">{item.parameterName}</div>
+                      </td>
+                      <td className="px-3.5 py-2.5 font-mono text-[11px] text-slate-800">{item.valueUsed}</td>
+                      <td className="px-3.5 py-2.5 whitespace-nowrap">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded font-semibold text-[10px] uppercase ${
+                            item.verificationStatus === 'verified'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          {item.verificationStatus}
+                        </span>
+                      </td>
+                      <td className="px-3.5 py-2.5 text-slate-600">
+                        <div className="font-medium text-slate-800">{item.sourceTitle}</div>
+                        <div className="text-[11px] text-slate-500 mt-0.5">{item.notes}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </section>

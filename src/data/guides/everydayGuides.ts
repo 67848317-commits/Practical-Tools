@@ -194,7 +194,7 @@ export const everydayGuides: GuideItem[] = [
       },
       {
         term: 'Utility Rate ($ per kWh)',
-        definition: 'The total price your electric company charges for every kilowatt-hour used (US national average is ~16 cents per kWh).',
+        definition: 'The total price your electric company charges for every kilowatt-hour used (U.S. EIA Table 2.10 2024 residential annual average was 16.48¢/kWh).',
         example: '$0.165/kWh on your monthly billing statement.',
       },
       {
@@ -456,7 +456,7 @@ export const everydayGuides: GuideItem[] = [
       {
         title: 'Using volume cups instead of a kitchen scale for baking',
         description: 'Volume measurements compound flour density errors when scaled up or down.',
-        fix: 'Convert flour and sugar to grams (1 cup all-purpose flour ≈ 125g; 1 cup sugar ≈ 200g) for effortless scaling.',
+        fix: 'Convert flour and sugar to grams (1 cup spooned & leveled all-purpose flour ≈ 120g; 1 cup granulated sugar ≈ 200g) for consistent scaling.',
       },
     ],
     practicalTips: [

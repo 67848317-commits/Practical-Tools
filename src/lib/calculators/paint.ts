@@ -72,8 +72,8 @@ export function calculatePaint(input: PaintInput): PaintResult {
   const l = parseFloat(lStr);
   const w = parseFloat(wStr);
   const h = parseFloat(hStr);
-  const numDoors = dStr === '' ? 0 : parseInt(dStr, 10);
-  const numWindows = winStr === '' ? 0 : parseInt(winStr, 10);
+  const numDoors = dStr === '' ? 0 : (/^\d+$/.test(dStr) ? Number(dStr) : NaN);
+  const numWindows = winStr === '' ? 0 : (/^\d+$/.test(winStr) ? Number(winStr) : NaN);
   const coverage = parseFloat(covStr);
 
   if (isNaN(l) || l <= 0 || isNaN(w) || w <= 0 || isNaN(h) || h <= 0) {
@@ -86,7 +86,7 @@ export function calculatePaint(input: PaintInput): PaintResult {
   if (isNaN(numDoors) || numDoors < 0 || isNaN(numWindows) || numWindows < 0) {
     return {
       ...emptyResult,
-      errorMessage: 'Door and window counts must be zero or positive numbers.',
+      errorMessage: 'Door and window counts must be zero or positive whole numbers.',
     };
   }
 
@@ -118,7 +118,12 @@ export function calculatePaint(input: PaintInput): PaintResult {
   const estimatedWallArea = Math.max(0, grossWallArea - openingsDeduction);
   const totalSurfaceToPaint = estimatedWallArea * coats;
   const estimatedPaintRequired = totalSurfaceToPaint / coverage;
-  const recommendedCans = Math.ceil(estimatedPaintRequired);
+  const safeCeil = (val: number): number => {
+    if (val <= 1e-9) return 0;
+    const rounded = Math.round(val);
+    return Math.abs(val - rounded) < 1e-9 ? rounded : Math.ceil(val);
+  };
+  const recommendedCans = safeCeil(estimatedPaintRequired);
 
   // Suggested package-size combination (gallons vs quarts for imperial, full liters for metric)
   let recommendedGallons = 0;

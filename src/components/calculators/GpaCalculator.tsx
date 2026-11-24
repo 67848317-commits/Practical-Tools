@@ -160,7 +160,7 @@ export const GpaCalculator: React.FC = () => {
           </div>
 
           <p className="text-xs text-slate-500 pt-1">
-            Tip: Standard high school and college courses are 3 or 4 credits. Honors courses earn +0.5 GPA bonus; AP and IB courses earn +1.0 bonus.
+            Note: Uses an illustrative U.S. 4.0 grading scale (A+/A=4.0, A-=3.7 ... F=0.0) with Honors (+0.5) and AP/IB (+1.0) weighting. Official scales and honors bonuses vary by school.
           </p>
         </div>
 

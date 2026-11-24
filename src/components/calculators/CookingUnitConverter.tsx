@@ -115,7 +115,7 @@ export const CookingUnitConverter: React.FC = () => {
           {/* Volume vs Weight Disclaimer */}
           <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
             <strong className="block font-semibold mb-0.5">Liquid Volume vs. Dry Weight Notice:</strong>
-            This tool converts <em>fluid volume</em> (space occupied). Dry ingredients (such as flour or sugar) have different densities and require weight conversion (see our Cups to Grams Converter).
+            This tool converts <em>fluid volume</em> using US customary ratios (1 US customary cup = 236.6 mL; FDA legal cup = 240 mL; metric cup = 250 mL). Dry ingredients (such as flour or sugar) vary by density and require weight conversion (see our Cups to Grams Converter).
           </div>
         </div>
 

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { RotateCcw, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
-
-type Mode = 'percent_of' | 'is_what_percent' | 'change';
+import { RotateCcw, AlertCircle } from 'lucide-react';
+import { calculatePercentage, PercentageMode } from '../../lib/calculators/percentage';
 
 export const PercentageCalculator: React.FC = () => {
-  const [mode, setMode] = useState<Mode>('percent_of');
+  const [mode, setMode] = useState<PercentageMode>('percent_of');
 
   // Mode 1: What is X% of Y?
   const [m1Percent, setM1Percent] = useState<string>('15');
@@ -27,72 +26,18 @@ export const PercentageCalculator: React.FC = () => {
     setM3Final('75');
   };
 
-  // Calculations & Validations
-  let resultText = '';
-  let subResult = '';
-  let calculationSteps: string[] = [];
-  let errorMsg = '';
+  const result = calculatePercentage({
+    mode,
+    m1Percent,
+    m1Value,
+    m2Part,
+    m2Whole,
+    m3Initial,
+    m3Final,
+  });
 
-  if (mode === 'percent_of') {
-    const p = parseFloat(m1Percent);
-    const v = parseFloat(m1Value);
-    if (m1Percent.trim() === '' || m1Value.trim() === '' || isNaN(p) || isNaN(v)) {
-      errorMsg = 'Please enter valid numerical values for both percentage and base value.';
-    } else {
-      const res = (p / 100) * v;
-      // Format cleanly (e.g. max 4 decimal digits, or 2 for currency-like)
-      const formattedRes = Number.isInteger(res)
-        ? res.toLocaleString()
-        : res.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).replace(/\.?0+$/, '');
-      resultText = formattedRes;
-      subResult = `${p}% of ${v.toLocaleString()} is ${formattedRes}`;
-      calculationSteps = [
-        `Convert percentage to decimal: ${p} ÷ 100 = ${(p / 100).toFixed(4).replace(/\.?0+$/, '')}`,
-        `Multiply decimal by value: ${(p / 100).toFixed(4).replace(/\.?0+$/, '')} × ${v.toLocaleString()} = ${formattedRes}`,
-      ];
-    }
-  } else if (mode === 'is_what_percent') {
-    const part = parseFloat(m2Part);
-    const whole = parseFloat(m2Whole);
-    if (m2Part.trim() === '' || m2Whole.trim() === '' || isNaN(part) || isNaN(whole)) {
-      errorMsg = 'Please enter valid numbers for both part and whole values.';
-    } else if (whole === 0) {
-      errorMsg = 'Whole value (denominator) cannot be zero.';
-    } else {
-      const res = (part / whole) * 100;
-      const formattedRes = Number.isInteger(res) ? res.toString() : res.toFixed(2).replace(/\.?0+$/, '');
-      resultText = `${formattedRes}%`;
-      subResult = `${part.toLocaleString()} is ${formattedRes}% of ${whole.toLocaleString()}`;
-      calculationSteps = [
-        `Divide part by whole: ${part.toLocaleString()} ÷ ${whole.toLocaleString()} = ${(part / whole).toFixed(4).replace(/\.?0+$/, '')}`,
-        `Multiply by 100 to get percent: ${(part / whole).toFixed(4).replace(/\.?0+$/, '')} × 100 = ${formattedRes}%`,
-      ];
-    }
-  } else if (mode === 'change') {
-    const init = parseFloat(m3Initial);
-    const fin = parseFloat(m3Final);
-    if (m3Initial.trim() === '' || m3Final.trim() === '' || isNaN(init) || isNaN(fin)) {
-      errorMsg = 'Please enter valid numbers for both starting and final values.';
-    } else if (init === 0) {
-      errorMsg = 'Starting baseline value cannot be zero when calculating relative percentage change.';
-    } else {
-      const diff = fin - init;
-      const pct = (diff / Math.abs(init)) * 100;
-      const formattedPct = Number.isInteger(pct) ? pct.toString() : pct.toFixed(2).replace(/\.?0+$/, '');
-      const isIncrease = diff > 0;
-      const isZero = diff === 0;
-
-      resultText = isZero ? '0%' : `${isIncrease ? '+' : ''}${formattedPct}%`;
-      subResult = isZero
-        ? 'No change between starting and final value.'
-        : `${isIncrease ? 'Increase' : 'Decrease'} of ${Math.abs(Number(formattedPct))}% (Difference: ${diff > 0 ? '+' : ''}${diff.toLocaleString()})`;
-      calculationSteps = [
-        `Calculate absolute difference: ${fin.toLocaleString()} - ${init.toLocaleString()} = ${diff.toLocaleString()}`,
-        `Divide difference by starting value: ${diff.toLocaleString()} ÷ ${Math.abs(init).toLocaleString()} = ${(diff / Math.abs(init)).toFixed(4)}`,
-        `Multiply by 100: ${(diff / Math.abs(init)).toFixed(4)} × 100 = ${formattedPct}%`,
-      ];
-    }
-  }
+  const { resultText, subResult, calculationSteps } = result;
+  const errorMsg = result.errorMessage ?? '';
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs" id="percentage-calculator-widget">

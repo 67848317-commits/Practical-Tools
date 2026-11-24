@@ -872,7 +872,7 @@ export const tools: ToolDefinition[] = [
     faqs: [
       {
         question: 'What is the IRS standard mileage rate?',
-        answer: 'The IRS standard business mileage rate (which factors in depreciation, maintenance, insurance, and fuel) is typically 65 to 67 cents per mile.',
+        answer: 'The IRS publishes an updated annual standard business mileage rate each tax year (covering fuel, depreciation, maintenance, and insurance); verify the current tax-year rate directly at IRS.gov.',
       },
     ],
     relatedSlugs: ['fuel-cost', 'gas-mileage', 'salary-to-hourly'],
@@ -1155,14 +1155,14 @@ export const tools: ToolDefinition[] = [
     shortIntro: 'Convert baking cups to exact grams and ounces based on true ingredient physical densities for consistent pastry and bread results.',
     formulaDescription: 'Weight (Grams) = Cups × Ingredient Density (Grams per Cup)',
     formulaExplanation: [
-      'All-Purpose Flour: 120 grams per US cup (King Arthur & USDA FDC 168893, spooned & leveled)',
-      'Bread Flour: 125 grams per US cup',
-      'Granulated White Sugar: 200 grams per US cup',
-      'Packed Brown Sugar: 220 grams per US cup (Domino Sugar / King Arthur)',
+      'All-Purpose Flour: 120 grams per US cup (King Arthur Weight Chart spooned & leveled; USDA FDC 168893 uses 125g)',
+      'Bread Flour: 125 grams per US cup (culinary default; King Arthur lists 120g)',
+      'Granulated White Sugar: 200 grams per US cup (USDA FDC 169655; King Arthur lists 198g)',
+      'Packed Brown Sugar: 220 grams per US cup (culinary default; King Arthur lists 213g)',
       'Unsalted Butter: 227 grams per cup (2 standard sticks = 8 oz)',
-      'Powdered Confectioners Sugar: 120 grams per cup (unsifted)',
-      'Unsweetened Cocoa Powder: 85 grams per cup',
-      'Rolled Oats: 90 grams per cup',
+      'Powdered Confectioners Sugar: 120 grams per cup (culinary default; King Arthur lists 113g unsifted)',
+      'Unsweetened Cocoa Powder: 85 grams per cup (culinary default; King Arthur 84g, USDA 86g)',
+      'Rolled Oats: 90 grams per cup (culinary default; King Arthur lists 89g)',
     ],
     howItWorks: [
       'Choose conversion direction: Cups → Grams or Grams → Cups.',
@@ -1326,9 +1326,9 @@ export const tools: ToolDefinition[] = [
       },
     ],
     assumptions: [
-      'Uses the standard North American 4.0 unweighted grading scale.',
-      'Assumes all listed courses are credit-bearing letter grades (Pass/Fail and Audited courses do not affect GPA).',
-      'Honors or AP weighted 5.0 scales are not used unless manually configured.',
+      'Uses an illustrative North American 4.0 unweighted scale (A+/A=4.0, A-=3.7 ... F=0.0) and optional 5.0 weighted bonuses (+0.5 Honors, +1.0 AP/IB).',
+      'Assumes all listed courses are credit-bearing letter grades (Pass/Fail and 0-credit audited courses are excluded from GPA).',
+      'Official grading scales, +/- point steps, and weighted course bonuses vary by school and university.',
     ],
     commonMistakes: [
       {

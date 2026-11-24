@@ -184,7 +184,7 @@ export const TileCalculator: React.FC = () => {
             id="tile-waste"
             label="Waste Allowance Percentage"
             suffix="%"
-            helperText="10% standard grid pattern; 15% for diagonal or complex herringbone cuts."
+            helperText="Illustrative planning allowances: 10% standard grid; 15% diagonal. Does not model grout spacing or box rounding."
           >
             <input
               id="tile-waste"
