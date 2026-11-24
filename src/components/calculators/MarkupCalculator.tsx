@@ -126,6 +126,38 @@ export const MarkupCalculator: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* Compact Margin-to-Markup Reference & Cost Scope Note */}
+      <div className="mt-6 pt-5 border-t border-slate-100 space-y-3">
+        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+              Margin-to-Markup Quick Reference
+            </h3>
+            <span className="text-[11px] font-mono text-slate-500">
+              Markup % = Margin % ÷ (1 - Margin % / 100)
+            </span>
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center text-xs">
+            {[
+              { margin: '20%', markup: '25.00%' },
+              { margin: '25%', markup: '33.33%' },
+              { margin: '33.33%', markup: '50.00%' },
+              { margin: '40%', markup: '66.67%' },
+              { margin: '50%', markup: '100.00%' },
+              { margin: '60%', markup: '150.00%' },
+            ].map((row) => (
+              <div key={row.margin} className="p-2 rounded-lg bg-white border border-slate-200/80">
+                <div className="font-bold text-slate-900">{row.margin} margin</div>
+                <div className="text-[11px] text-emerald-700 font-mono">{row.markup} markup</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="text-[11px] text-slate-500 leading-relaxed">
+          Scope Note: Gross profit and gross margin reflect product unit cost (COGS) only. Operating overhead (rent, payroll, marketing), payment processing fees, outbound shipping, returns, and sales or income taxes are excluded unless added into Original Cost.
+        </p>
+      </div>
     </CalculatorCard>
   );
 };

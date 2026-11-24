@@ -29,6 +29,7 @@ const GpaCalculator = React.lazy(() => import('./calculators/GpaCalculator').the
 import type { ToolDefinition } from '../types';
 import { BookOpen, AlertTriangle, Check, Sparkles, Info, ArrowRight } from 'lucide-react';
 import { getCompanionGuideForTool } from '../data/guides';
+import { getCategoryBySlug } from '../data/categories';
 import { updatePageSEO } from '../utils/seo';
 
 interface ToolLayoutProps {
@@ -40,6 +41,8 @@ interface ToolLayoutProps {
 export const ToolLayout: React.FC<ToolLayoutProps> = ({ tool, onNavigate, calculatorRegistry }) => {
   const companionGuide = getCompanionGuideForTool(tool.slug);
 
+  const categoryName = getCategoryBySlug(tool.category)?.name ?? tool.category.replace('-', ' & ');
+
   useEffect(() => {
     updatePageSEO({
       title: tool.metaTitle || `${tool.title} – Practical Tools`,
@@ -47,7 +50,7 @@ export const ToolLayout: React.FC<ToolLayoutProps> = ({ tool, onNavigate, calcul
       canonicalPath: tool.path || `/calculators/${tool.slug}`,
       breadcrumbs: [
         { name: 'Calculators', url: '/calculators' },
-        { name: tool.category, url: `/category/${tool.category.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}` },
+        { name: categoryName, url: `/category/${tool.category}` },
         { name: tool.shortTitle || tool.title },
       ],
       tool: tool,
@@ -56,7 +59,7 @@ export const ToolLayout: React.FC<ToolLayoutProps> = ({ tool, onNavigate, calcul
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
-  }, [tool]);
+  }, [tool, categoryName]);
 
   const renderLazyCalculator = () => {
     switch (tool.slug) {
@@ -156,7 +159,7 @@ export const ToolLayout: React.FC<ToolLayoutProps> = ({ tool, onNavigate, calcul
 
   const breadcrumbs = [
     { name: 'Calculators', url: '/calculators' },
-    { name: tool.category.replace('-', ' & '), url: `/category/${tool.category}` },
+    { name: categoryName, url: `/category/${tool.category}` },
     { name: tool.title },
   ];
 
@@ -169,7 +172,7 @@ export const ToolLayout: React.FC<ToolLayoutProps> = ({ tool, onNavigate, calcul
       <header className="mb-8">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-md">
-            {tool.category.replace('-', ' & ')}
+            {categoryName}
           </span>
           {tool.badge && (
             <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">

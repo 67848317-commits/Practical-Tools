@@ -60,9 +60,9 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ categorySlug, onNavi
     home: {
       title: 'Material Estimation & Waste Factor Guidelines',
       tips: [
-        'Always budget a 10% waste buffer for standard room flooring and tile layouts, increasing to 15% for diagonal installations or irregular floor plans.',
-        'When measuring wall areas for paint, subtract 20 square feet per standard interior door and 15 square feet per standard window.',
-        'Order bagged concrete and mulch by total volume rounded up to the nearest whole bag or cubic half-yard to avoid mid-project shortfalls.',
+        'Use an illustrative waste buffer suited to your layout—often around 10% for straight flooring or grid tile, 15% for diagonal installations or obstacles, and 20% for herringbone patterns—adjusting for room shape.',
+        'When estimating interior paint, editable planning defaults subtract 20 sq ft per standard door and 15 sq ft per standard window and compare fractional gallons against gallon-plus-quart container mixes.',
+        'Concrete and mulch tools output exact decimal cubic yards and whole retail bags; verify local bulk-delivery minimums (often half-yard or full-yard increments) or add an extra bag before ordering.',
       ],
     },
     everyday: {
@@ -84,9 +84,9 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ categorySlug, onNavi
     'work-school': {
       title: 'Time Card & Academic Calculation Principles',
       tips: [
-        'Ensure unpaid meal breaks (typically 30–60 minutes) are deducted from gross clock-in and clock-out timestamps to determine net billable hours.',
-        'Weighted GPAs assign higher point values (up to 5.0) to Advanced Placement (AP) and International Baccalaureate (IB) courses compared to standard 4.0 scales.',
-        'Verify whether overtime pay thresholds in your jurisdiction trigger at 40 hours per calendar week or 8 hours in a single 24-hour workday.',
+        'Deduct unpaid meal breaks (such as 30–60 minutes) from gross clock-in and clock-out times to determine net shift hours and payroll decimal hours.',
+        'Weighted GPAs may assign bonus grade points (such as +0.5 Honors or +1.0 AP/IB on a 5.0 scale) depending on institutional grading policies.',
+        'Under the federal Fair Labor Standards Act (FLSA), nonexempt overtime (1.5× regular rate) applies after 40 hours in a fixed 168-hour workweek, while certain states also enforce daily overtime thresholds such as hours over 8 in a day.',
       ],
     },
   };
@@ -133,6 +133,93 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ categorySlug, onNavi
           </div>
         )}
       </section>
+
+      {/* Concise Tool Choosers for Overlapping Multi-Tool Categories */}
+      {category.slug === 'everyday' && (
+        <section className="mb-12 p-5 sm:p-6 bg-white rounded-2xl border border-slate-200" aria-labelledby="driving-chooser-heading">
+          <div className="flex items-center gap-2 mb-3">
+            <HelpCircle className="w-4 h-4 text-blue-600 shrink-0" />
+            <h2 id="driving-chooser-heading" className="text-base sm:text-lg font-bold text-slate-900">
+              Which Driving Calculator Should I Use?
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+            <a
+              href="/calculators/fuel-cost"
+              onClick={(e) => handleNav('/calculators/fuel-cost', e)}
+              className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-400 transition-colors block"
+            >
+              <div className="font-bold text-slate-900 mb-1">Fuel Cost Calculator →</div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Best for a single road trip when you already know total distance, vehicle MPG, and gas price.
+              </p>
+            </a>
+            <a
+              href="/calculators/gas-mileage"
+              onClick={(e) => handleNav('/calculators/gas-mileage', e)}
+              className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-400 transition-colors block"
+            >
+              <div className="font-bold text-slate-900 mb-1">Gas Mileage Calculator →</div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Best at the pump to measure real-world MPG (or L/100 km) from trip odometer miles and gallons filled.
+              </p>
+            </a>
+            <a
+              href="/calculators/commute-cost"
+              onClick={(e) => handleNav('/calculators/commute-cost', e)}
+              className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-400 transition-colors block"
+            >
+              <div className="font-bold text-slate-900 mb-1">Commute Cost Calculator →</div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Best for budgeting recurring weekly, monthly, and annual drive-to-work costs including parking and tolls.
+              </p>
+            </a>
+          </div>
+        </section>
+      )}
+
+      {category.slug === 'cooking' && (
+        <section className="mb-12 p-5 sm:p-6 bg-white rounded-2xl border border-slate-200" aria-labelledby="cooking-chooser-heading">
+          <div className="flex items-center gap-2 mb-3">
+            <HelpCircle className="w-4 h-4 text-blue-600 shrink-0" />
+            <h2 id="cooking-chooser-heading" className="text-base sm:text-lg font-bold text-slate-900">
+              Which Kitchen Tool Should I Use?
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+            <a
+              href="/calculators/unit-converter"
+              onClick={(e) => handleNav('/calculators/unit-converter', e)}
+              className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-400 transition-colors block"
+            >
+              <div className="font-bold text-slate-900 mb-1">Cooking Unit Converter →</div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Convert kitchen volumes (cups, tablespoons, teaspoons, mL, fl oz) when ingredients do not change physical state.
+              </p>
+            </a>
+            <a
+              href="/calculators/cups-to-grams"
+              onClick={(e) => handleNav('/calculators/cups-to-grams', e)}
+              className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-400 transition-colors block"
+            >
+              <div className="font-bold text-slate-900 mb-1">Cups to Grams Converter →</div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Convert baking cups to digital scale weight (grams &amp; ounces) using ingredient-specific density for flour, sugar, or butter.
+              </p>
+            </a>
+            <a
+              href="/calculators/recipe-scale"
+              onClick={(e) => handleNav('/calculators/recipe-scale', e)}
+              className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-400 transition-colors block"
+            >
+              <div className="font-bold text-slate-900 mb-1">Recipe Scale Calculator →</div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Multiply or halve an entire list of ingredients cleanly from original recipe servings to target servings.
+              </p>
+            </a>
+          </div>
+        </section>
+      )}
 
       {/* Relevant Guides Section if any exist for this category */}
       {categoryGuides.length > 0 && (

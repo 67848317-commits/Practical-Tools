@@ -110,7 +110,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenSearch }) 
               Popular Tools & Calculators
             </h2>
             <p className="text-sm text-slate-500 mt-1 max-w-xl">
-              Each tool provides verified formulas, step-by-step arithmetic explanations, and sensible real-world defaults.
+              Each tool provides documented calculation formulas, step-by-step arithmetic breakdowns, and transparent planning defaults you can adjust to your numbers.
             </p>
           </div>
           <div className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg whitespace-nowrap self-start sm:self-auto">

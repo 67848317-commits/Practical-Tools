@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { siteConfig } from './data/site';
 import { getToolBySlug, tools } from './data/tools';
-import { categories } from './data/categories';
+import { categories, getCategoryBySlug } from './data/categories';
 import { updatePageSEO } from './utils/seo';
 
 import { Header } from './components/Header';
@@ -87,7 +87,7 @@ export default function App({ initialPath, calculatorRegistry }: AppProps = {}) 
           tool: tool,
           breadcrumbs: [
             { name: 'Calculators', url: '/calculators' },
-            { name: tool.category.replace('-', ' & '), url: `/category/${tool.category}` },
+            { name: getCategoryBySlug(tool.category)?.name ?? tool.category.replace('-', ' & '), url: `/category/${tool.category}` },
             { name: tool.title },
           ],
           faqs: tool.faqs,

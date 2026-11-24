@@ -182,6 +182,10 @@ export const WorkHoursCalculator: React.FC = () => {
           />
         </div>
       </div>
+
+      <p className="mt-5 pt-4 border-t border-slate-100 text-[11px] text-slate-500 leading-relaxed">
+        Single-Shift Scope: Calculates net duration, decimal hours, and straight-time gross pay for one shift (including midnight rollover). Under U.S. FLSA rules, nonexempt 1.5× overtime is measured over a fixed 168-hour (40-hour) workweek, while certain states also enforce daily overtime thresholds (such as &gt;8 hours/day).
+      </p>
     </CalculatorCard>
   );
 };

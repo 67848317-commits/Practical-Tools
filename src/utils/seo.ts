@@ -1,6 +1,6 @@
 import { siteConfig } from '../data/site';
 import { tools, getToolBySlug } from '../data/tools';
-import { categories } from '../data/categories';
+import { categories, getCategoryBySlug } from '../data/categories';
 import { guides, getGuideBySlug } from '../data/guides';
 import type { BreadcrumbItem, FAQItem, ToolDefinition } from '../types';
 
@@ -59,7 +59,7 @@ export function getPageSEOData(path: string): PageSEOData {
           '@type': 'BreadcrumbList',
           itemListElement: [
             { '@type': 'ListItem', position: 1, name: 'Calculators', item: `${siteConfig.url}/calculators` },
-            { '@type': 'ListItem', position: 2, name: tool.category.replace('-', ' & '), item: `${siteConfig.url}/category/${tool.category}` },
+            { '@type': 'ListItem', position: 2, name: getCategoryBySlug(tool.category)?.name ?? tool.category.replace('-', ' & '), item: `${siteConfig.url}/category/${tool.category}` },
             { '@type': 'ListItem', position: 3, name: tool.shortTitle || tool.title, item: canonicalUrl },
           ],
         },
