@@ -85,9 +85,12 @@ export function calculateTip(input: TipInput): TipResult {
   const rawTip = (bill * activeTipPct) / 100;
   let totalBill = bill + rawTip;
 
-  if (input.roundUp && totalBill > 1e-9) {
+  if (input.roundUp && totalBill > 0 && Number.isFinite(totalBill)) {
     const rounded = Math.round(totalBill);
-    totalBill = Math.abs(totalBill - rounded) < 1e-9 ? rounded : Math.ceil(totalBill);
+    totalBill =
+      rounded >= 1 && totalBill > rounded && totalBill - rounded <= Number.EPSILON * rounded * 64
+        ? rounded
+        : Math.ceil(totalBill);
   }
 
   const finalTipAmount = Math.max(0, totalBill - bill);

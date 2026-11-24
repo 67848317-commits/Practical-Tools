@@ -91,9 +91,12 @@ export function calculateFlooring(input: FlooringInput): FlooringResult {
   let overageArea: number | undefined = undefined;
 
   const safeCeil = (val: number): number => {
-    if (val <= 1e-9) return 0;
+    if (val <= 0 || !Number.isFinite(val)) return 0;
     const rounded = Math.round(val);
-    return Math.abs(val - rounded) < 1e-9 ? rounded : Math.ceil(val);
+    if (rounded >= 1 && val > rounded && val - rounded <= Number.EPSILON * rounded * 64) {
+      return rounded;
+    }
+    return Math.ceil(val);
   };
 
   if (boxSize && !isNaN(boxSize) && boxSize > 0) {

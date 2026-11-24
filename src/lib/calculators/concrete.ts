@@ -110,9 +110,12 @@ export function calculateConcrete(input: ConcreteInput): ConcreteResult {
   const yield50 = input.bagYield50lb && input.bagYield50lb > 0 ? input.bagYield50lb : 0.375;
 
   const safeCeil = (val: number): number => {
-    if (val <= 1e-9) return 0;
+    if (val <= 0 || !Number.isFinite(val)) return 0;
     const rounded = Math.round(val);
-    return Math.abs(val - rounded) < 1e-9 ? rounded : Math.ceil(val);
+    if (rounded >= 1 && val > rounded && val - rounded <= Number.EPSILON * rounded * 64) {
+      return rounded;
+    }
+    return Math.ceil(val);
   };
 
   const bags80lb = safeCeil(recommendedCubicFeet / yield80);

@@ -176,6 +176,12 @@ test('3. Tip Calculator (normal, zero, boundary, invalid, special cases)', () =>
 
   const exactRound = calculateTip({ billAmount: '50', tipPercent: 0, peopleCount: '1', roundUp: true });
   assert(exactRound.totalBill === 50 && exactRound.tipAmount === 0, `Exact whole dollar should not round up: got ${exactRound.totalBill}`);
+
+  const tinyPositiveRound = calculateTip({ billAmount: '0.0000000005', tipPercent: 0, peopleCount: '1', roundUp: true });
+  assert(tinyPositiveRound.totalBill === 1, `Tiny positive bill roundUp should give $1, got ${tinyPositiveRound.totalBill}`);
+
+  const legitExcessRound = calculateTip({ billAmount: '50.0000000005', tipPercent: 0, peopleCount: '1', roundUp: true });
+  assert(legitExcessRound.totalBill === 51, `Legitimate 5e-10 excess over $50 should round up to $51, got ${legitExcessRound.totalBill}`);
 });
 
 // ==========================================
@@ -285,6 +291,10 @@ test('6. Paint Calculator (normal, zero, boundary, invalid, special cases)', () 
   const metric = calculatePaint({ unit: 'metric', length: '5', width: '4', height: '3', doors: '1', windows: '1', coats: 2, coveragePerGallon: '10' });
   // Gross: 2*(5+4)*3 = 54 m2; ded: 1.86 + 1.39 = 3.25; net: 50.75; 2 coats = 101.5 / 10 = 10.15 L -> 11 L
   assert(metric.volumeUnit === 'Liters' && metric.recommendedCans === 11, `Expected 11 Liters, got ${metric.recommendedCans}`);
+
+  // Tiny positive paint (<1e-9 gal) must require at least 1 can, not 0
+  const tinyPaint = calculatePaint({ unit: 'imperial', length: '0.001', width: '0.001', height: '0.001', doors: '0', windows: '0', coats: 1, coveragePerGallon: '1000' });
+  assert(tinyPaint.recommendedCans === 1, `Expected 1 can for tiny non-zero paint area, got ${tinyPaint.recommendedCans}`);
 });
 
 // ==========================================
@@ -318,6 +328,10 @@ test('7. Flooring Calculator (normal, zero, boundary, invalid, special cases)', 
 
   const metric = calculateFlooring({ unit: 'meters', length: '5', width: '4', wastePercent: '15' });
   assert(metric.areaUnit === 'm²' && metric.recommendedMaterial === 23 && metric.boxesNeeded === undefined && metric.totalEstimatedCost === undefined, 'Metric flooring failed');
+
+  // Legitimate excess < 1e-9 above integer (1.0000000005 boxes) must round UP to 2, not down to 1
+  const legitBoxExcess = calculateFlooring({ unit: 'feet', length: '100', width: '1', wastePercent: '0.00000005', boxSize: '100' });
+  assert(legitBoxExcess.boxesNeeded === 2, `Expected 2 boxes for 1.0000000005 boxes needed, got ${legitBoxExcess.boxesNeeded}`);
 });
 
 // ==========================================
@@ -353,6 +367,14 @@ test('8. Tile Calculator (normal, zero, boundary, invalid, special cases)', () =
   const metric = calculateTile({ unit: 'metric', roomLength: '4', roomWidth: '3', tileLength: '30', tileWidth: '30', wastePercent: '10' });
   // 12 m² / 0.09 m² = 133.333 -> base 134, with 10% = ceil(146.666) = 147
   assert(metric.baseTilesNeeded === 134 && metric.recommendedTiles === 147, `Expected 134/147 metric tiles, got ${metric.baseTilesNeeded}/${metric.recommendedTiles}`);
+
+  // Large-scale IEEE-754 float safety (1e8 * 1.1 = 110000000.00000001 -> must stay exact 110000000)
+  const largeTile = calculateTile({ unit: 'imperial', roomLength: '10000', roomWidth: '10000', tileLength: '12', tileWidth: '12', wastePercent: '10' });
+  assert(largeTile.recommendedTiles === 110000000, `Expected exact 110000000 tiles at large scale, got ${largeTile.recommendedTiles}`);
+
+  // Slightly below integer (0.999999 tiles) must round up to 1
+  const belowOneTile = calculateTile({ unit: 'imperial', roomLength: '0.999999', roomWidth: '1', tileLength: '12', tileWidth: '12', wastePercent: '0' });
+  assert(belowOneTile.recommendedTiles === 1, `Expected 1 tile for 0.999999, got ${belowOneTile.recommendedTiles}`);
 });
 
 // ==========================================
@@ -416,9 +438,15 @@ test('10. Mulch Calculator (normal, zero, boundary, invalid, special cases)', ()
   assert(Boolean(calculateMulch({ lengthFeet: '-5', widthFeet: '5', depthInches: '3' }).errorMessage), 'Expected error for negative length');
   assert(Boolean(calculateMulch({ lengthFeet: 'abc', widthFeet: '5', depthInches: '3' }).errorMessage), 'Expected error for NaN length');
 
-  // Special case: small area ceiling behavior (1x1x1 -> 1 bag of each size)
+  // Special case: small area ceiling behavior (1x1x1 -> 1 bag; tiny <1e-9 cu ft -> 1 bag; 1 + 5e-10 bags -> 2 bags)
   const small = calculateMulch({ lengthFeet: '1', widthFeet: '1', depthInches: '1' });
   assert(small.bags2CuFt === 1 && small.bags3CuFt === 1, 'Minimum 1 bag ceiling check failed');
+
+  const tinyMulch = calculateMulch({ lengthFeet: '0.0001', widthFeet: '0.0001', depthInches: '0.001' });
+  assert(tinyMulch.bags2CuFt === 1 && tinyMulch.bags3CuFt === 1, `Tiny non-zero mulch must need 1 bag, got ${tinyMulch.bags2CuFt}/${tinyMulch.bags3CuFt}`);
+
+  const legitMulchExcess = calculateMulch({ lengthFeet: '2', widthFeet: '12', depthInches: '1.0000000005' });
+  assert(legitMulchExcess.bags2CuFt === 2, `Expected 2 bags for 1.0000000005x2 cuft mulch, got ${legitMulchExcess.bags2CuFt}`);
 });
 
 // ==========================================

@@ -1175,7 +1175,7 @@ export const tools: ToolDefinition[] = [
         title: '2.5 Cups of All-Purpose Flour to Grams (Spooned & Leveled)',
         scenario: 'Baking sourdough bread using a digital kitchen scale.',
         steps: [
-          'Flour density: 1 cup = 120 grams (King Arthur & USDA spooned & leveled standard).',
+          'Flour density: 1 cup = 120 grams (King Arthur Baking Weight Chart, spooned & leveled; USDA FDC 168893 uses 125g).',
           'Calculate: 2.5 cups × 120 g/cup = 300 grams.',
         ],
         result: '2.5 cups of all-purpose flour equals 300 grams (10.58 oz).',
@@ -1184,18 +1184,18 @@ export const tools: ToolDefinition[] = [
         title: '1 Cup of Packed Brown Sugar to Grams',
         scenario: 'Measuring brown sugar for chocolate chip cookies.',
         steps: [
-          'Brown sugar density: 1 cup packed = 220 grams.',
+          'Brown sugar density: 1 cup packed = 220 grams (culinary planning default; King Arthur lists 213g).',
           'Calculate: 1.0 × 220 = 220 grams.',
         ],
         result: '1 cup packed brown sugar equals 220 grams (7.76 oz).',
       },
     ],
     assumptions: [
-      'Bulk densities calibrated to King Arthur Baking Company Master Weight Chart and USDA FoodData Central (FDC ID 168893).',
+      'Verified anchors include King Arthur Baking Weight Chart (120g all-purpose flour, 227g butter), USDA FoodData Central granulated sugar (FDC ID 169655: 200g), and FDA Legal Cup water (21 CFR 101.9: 240 mL = 240g). Remaining entries (bread flour 125g, brown sugar 220g, powdered sugar 120g, cocoa 85g, oats 90g, whole milk 245g) are rounded culinary planning defaults.',
       'All-purpose flour is assumed spooned and leveled at 120g/cup; dipping the measuring cup directly into the flour sack packs 140–150g, causing dry, heavy baked goods.',
       'Brown sugar assumes standard firmly packed density (holds cup shape when inverted).',
       'Butter is converted at standard US stick density (1 cup = 2 sticks = 8 oz = 227g).',
-      'Liquid measures (water, milk) use US legal cup definition of 240 mL (240g water).',
+      'Liquid water uses the FDA US legal cup (240 mL = 240g); whole milk uses ~245g/cup culinary reference (USDA FoodData Central lists 244g).',
     ],
     commonMistakes: [
       {
