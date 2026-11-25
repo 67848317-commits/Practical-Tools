@@ -28,7 +28,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ categorySlug, onNavi
 
   if (!category) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+      <div className="max-w-4xl mx-auto px-4 min-[420px]:px-5 sm:px-6 py-16 text-center">
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Category Not Found</h1>
         <p className="text-sm text-slate-500 mb-6">The requested tool category could not be located.</p>
         <a
@@ -94,7 +94,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({ categorySlug, onNavi
   const currentGuidelines = domainGuidelines[category.slug];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-6xl mx-auto px-4 min-[420px]:px-5 sm:px-6 py-8">
       <Breadcrumbs items={breadcrumbs} onNavigate={onNavigate} />
 
       <header className="mb-8">

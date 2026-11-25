@@ -58,7 +58,7 @@ export const GuidePage: React.FC<GuidePageProps> = ({ slug, onNavigate }) => {
 
   if (!guide) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
+      <div className="max-w-3xl mx-auto px-4 min-[420px]:px-5 sm:px-6 py-20 text-center">
         <h1 className="text-2xl font-bold text-slate-900 mb-3">Guide Not Found</h1>
         <p className="text-sm text-slate-600 mb-6">The requested practical guide could not be located.</p>
         <button
@@ -96,7 +96,7 @@ export const GuidePage: React.FC<GuidePageProps> = ({ slug, onNavigate }) => {
   };
 
   return (
-    <article className="pt-page-container py-8 sm:py-12 max-w-4xl mx-auto">
+    <article className="max-w-4xl mx-auto px-4 min-[420px]:px-5 sm:px-6 py-8 sm:py-12">
       {/* 1. Breadcrumb Navigation */}
       <nav aria-label="Breadcrumb" className="flex items-center flex-wrap gap-2 text-xs text-slate-500 mb-6">
         <button

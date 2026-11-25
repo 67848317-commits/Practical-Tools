@@ -36,7 +36,7 @@ export const GuidesIndexPage: React.FC<GuidesIndexPageProps> = ({ onNavigate }) 
     : guides.filter((g) => g.category.toLowerCase() === selectedCategory.toLowerCase());
 
   return (
-    <div className="pt-page-container py-12 md:py-16">
+    <div className="max-w-6xl mx-auto px-4 min-[420px]:px-5 sm:px-6 py-12 md:py-16">
       {/* Header Section */}
       <div className="max-w-3xl mx-auto text-center mb-10">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100/80 text-amber-800 border border-amber-200/70 mb-4">
